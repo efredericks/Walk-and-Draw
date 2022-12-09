@@ -13,8 +13,11 @@ let btnSave, btnClear;
 
 const DIM = 1000;
 
+let bgImage;
+
 function preload() {
     // font = loadFont("NerkoOne-Regular.ttf");
+    bgImage = loadImage("thumbnail_east_core_1916-1925.jpg");
 }
 
 function setup() {
@@ -23,8 +26,11 @@ function setup() {
 
     createCanvas(DIM, DIM + fontsize);
     gfx = createGraphics(DIM, DIM);
-
     gfx.background(255);
+
+    bgImage.resize(0, DIM);
+
+
     history = [];
 
     // font things
@@ -63,6 +69,7 @@ function setup() {
 
 
     gfx.noStroke();
+    gfx.image(bgImage, 0, 0);
 }
 
 function draw() {
@@ -90,6 +97,7 @@ function clearImg() {
     dirty = true;
     gfx.clear();
     gfx.background(255);
+    gfx.image(bgImage, 0, 0);
 }
 
 function changeStroke() {
