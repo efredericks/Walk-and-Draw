@@ -1,10 +1,8 @@
 // font: https://fonts.google.com/specimen/Nerko+One
 // https://support.google.com/chrome/thread/20108907/how-to-stop-desktop-browser-chrome-from-interpreting-my-wacom-tablet-as-a-touchscreen?hl=en
 
-// font: https://fonts.google.com/specimen/Nerko+One
-// https://support.google.com/chrome/thread/20108907/how-to-stop-desktop-browser-chrome-from-interpreting-my-wacom-tablet-as-a-touchscreen?hl=en
-
-let history = [];
+let strokes = [];
+let currentStroke = null;
 let gfx;
 let debounceDelay = 5; //15;
 let debounce = 0;
@@ -18,10 +16,9 @@ let btnUndo, btnRedo;
 const DIM = 1000;
 
 let bgImage;
-let savedHistory = [];
+let savedStrokes = [];
 
 function preload() {
-  // font = loadFont("NerkoOne-Regular.ttf");
   bgImage = loadImage("thumbnail_east_core_1916-1925.jpg");
 }
 
@@ -35,9 +32,8 @@ function setup() {
 
   bgImage.resize(0, DIM);
 
-  history = [];
+  strokes = [];
 
-  // font things
   textFont("Arial");
   gfx.textFont("Arial");
   textSize(fontsize);
@@ -47,27 +43,22 @@ function setup() {
 
   frameRate(60);
 
-  // elements
   colorPicker = createColorPicker(color(20));
   colorPicker.mouseClicked(changeStroke);
   colorPicker.position(width - fontsize, 0).size(fontsize, fontsize);
   gfx.fill(colorPicker.color());
 
-  // size of point
   sizeSlider = createSlider(1, 20 * windowScale, 1, 1);
   sizeSlider.position(width - fontsize - 90, 0);
   sizeSlider.style("width", "80px");
 
-  // UI
   let titleWidth = drawHeader();
   btnSave = createButton("Save");
   btnSave.mousePressed(saveImg);
-  // btnSave.style('font-size', fontsize/1.6+'px');
   btnSave.position(titleWidth + 10, 1);
 
   btnClear = createButton("Clear");
   btnClear.mousePressed(clearImg);
-  // btnSave.style('font-size', fontsize/1.6+'px');
   btnClear.position(
     btnSave.size().width + btnSave.size().width + titleWidth - 25,
     1
@@ -93,7 +84,6 @@ function draw() {
     dirty = false;
   }
 
-  // ctrl+z
   if (keyIsDown(CONTROL) && keyIsDown(90) && debounce == 0) {
     undo();
     debounce = debounceDelay;
@@ -111,8 +101,8 @@ function clearImg() {
   gfx.clear();
   gfx.background(255);
   gfx.image(bgImage, 0, 0);
-  history = [];
-  savedHistory = [];
+  strokes = [];
+  savedStrokes = [];
 }
 
 function changeStroke() {
@@ -132,29 +122,44 @@ function mouseDragged() {
   let y = mouseY - fontsize;
 
   if (y > fontsize) {
-    gfx.strokeWeight(sizeSlider.value());
-    gfx.stroke(colorPicker.color());
-    let colorString = colorPicker.color().toString();
-    history.push({ x: x, y: y, size: sizeSlider.value(), color: colorString });
-    drawPoint(x, y);
+    if (currentStroke === null) {
+      currentStroke = {
+        size: sizeSlider.value(),
+        color: colorPicker.color().toString(),
+        points: [],
+      };
+      strokes.push(currentStroke);
+    }
+
+    currentStroke.points.push({ x: x, y: y });
+    drawLine(currentStroke.points.length - 2, currentStroke.points.length - 1);
   }
 }
 
-function drawPoint(x, y) {
-  gfx.point(x, y);
+function drawLine(startIndex, endIndex) {
+  let stroke = currentStroke;
+  gfx.strokeWeight(stroke.size);
+  gfx.stroke(stroke.color);
+  let startPoint = stroke.points[startIndex];
+  let endPoint = stroke.points[endIndex];
+  gfx.line(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
   dirty = true;
 }
 
+function mouseReleased() {
+  currentStroke = null;
+}
+
 function undo() {
-  if (history.length > 0) {
-    savedHistory.push(history.pop());
+  if (strokes.length > 0) {
+    savedStrokes.push(strokes.pop());
     redrawCanvas();
   }
 }
 
 function redo() {
-  if (savedHistory.length > 0) {
-    history.push(savedHistory.pop());
+  if (savedStrokes.length > 0) {
+    strokes.push(savedStrokes.pop());
     redrawCanvas();
   }
 }
@@ -163,10 +168,14 @@ function redrawCanvas() {
   gfx.clear();
   gfx.background(255);
   gfx.image(bgImage, 0, 0);
-  for (let point of history) {
-    gfx.strokeWeight(point.size);
-    gfx.stroke(point.color);
-    gfx.point(point.x, point.y);
+  for (let stroke of strokes) {
+    gfx.strokeWeight(stroke.size);
+    gfx.stroke(stroke.color);
+    for (let i = 0; i < stroke.points.length - 1; i++) {
+      let startPoint = stroke.points[i];
+      let endPoint = stroke.points[i + 1];
+      gfx.line(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
+    }
   }
   dirty = true;
 }
