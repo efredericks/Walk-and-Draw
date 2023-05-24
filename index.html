@@ -2,17 +2,173 @@
 <html lang="en">
 
 <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.5.0/p5.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.5.0/addons/p5.sound.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <meta charset="utf-8" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
 
+    canvas {
+      border: 1px solid black;
+    }
+  </style>
 </head>
 
 <body>
-    <main>
-    </main>
-    <script src="sketch.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+  <script>
+    class PopUpWindow {
+      constructor(x, y, width, height) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.isMinimized = false;
+        this.isExpanded = false;
+        this.gfx = createGraphics(this.width, this.height);
+        this.gfx.background(255);
+        this.history = [];
+      }
+
+      toggleMinimize() {
+        this.isMinimized = !this.isMinimized;
+      }
+
+      toggleExpand() {
+        this.isExpanded = !this.isExpanded;
+      }
+
+      draw() {
+        push();
+        translate(this.x, this.y);
+
+        // Draw the pop-up window
+        fill(255);
+        stroke(0);
+        rect(0, 0, this.width, this.height);
+
+        if (this.isExpanded) {
+          // Draw the canvas content
+          image(this.gfx, 0, 0);
+        }
+
+        // Draw the minimize/expand button
+        let buttonSize = 20;
+        fill(200);
+        stroke(0);
+        rect(this.width - buttonSize, 0, buttonSize, buttonSize);
+
+        if (this.isExpanded) {
+          // Draw the minimize button
+          line(this.width - buttonSize + 5, 5, this.width - 5, buttonSize - 5);
+        } else {
+          // Draw the expand button
+          line(this.width - buttonSize + 5, 5, this.width - 5, 5);
+          line(this.width - buttonSize + 5, 10, this.width - 5, 10);
+          line(this.width - buttonSize + 5, 15, this.width - 5, 15);
+        }
+
+        pop();
+      }
+
+      handleMousePressed(mx, my) {
+        if (mx > this.x + this.width - 20 && my < this.y + 20) {
+          if (this.isExpanded) {
+            this.toggleMinimize();
+          } else {
+            this.toggleExpand();
+          }
+        }
+      }
+
+      handleMouseDragged(mx, my) {
+        if (!this.isMinimized && this.isExpanded) {
+          let x = mx - this.x;
+          let y = my - this.y;
+
+          this.gfx.stroke(0);
+          this.gfx.strokeWeight(2);
+          this.gfx.line(pmouseX - this.x, pmouseY - this.y, x, y);
+          this.history.push({ x, y });
+        }
+      }
+
+      clearCanvas() {
+        this.gfx.clear();
+        this.gfx.background(255);
+        this.history = [];
+      }
+    }
+
+    let popUpWindows = [];
+    const numWindows = 5;
+    const windowWidth = 200;
+    const windowHeight = 150;
+    const padding = 10;
+    const columnX = padding;
+    const columnY = padding;
+    const expandedWidth = 400;
+    const expandedHeight = 300;
+
+    function setup() {
+      createCanvas(windowWidth * numWindows + padding * (numWindows + 1), windowHeight + padding * 2);
+
+      for (let i = 0; i < numWindows; i++) {
+        const x = columnX + (windowWidth + padding) * i;
+        const y = columnY;
+        const popUpWindow = new PopUpWindow(x, y, windowWidth, windowHeight);
+        popUpWindows.push(popUpWindow);
+      }
+    }
+
+    function draw() {
+      background(220);
+
+      for (let i = 0; i < popUpWindows.length; i++) {
+        const popUp = popUpWindows[i];
+        if (popUp.isMinimized) {
+          fill(200);
+        } else {
+          fill(255);
+        }
+        popUp.draw();
+      }
+    }
+
+    function mousePressed() {
+      for (let i = 0; i < popUpWindows.length; i++) {
+        const popUp = popUpWindows[i];
+        if (mouseX > popUp.x && mouseX < popUp.x + popUp.width && mouseY > popUp.y && mouseY < popUp.y + popUp.height) {
+          popUp.handleMousePressed(mouseX, mouseY);
+        }
+      }
+    }
+
+    function mouseDragged() {
+      for (let i = 0; i < popUpWindows.length; i++) {
+        const popUp = popUpWindows[i];
+        if (mouseX > popUp.x && mouseX < popUp.x + popUp.width && mouseY > popUp.y && mouseY < popUp.y + popUp.height) {
+          popUp.handleMouseDragged(mouseX, mouseY);
+        }
+      }
+    }
+
+    function keyPressed() {
+      if (keyCode === CONTROL && key === "z") {
+        for (let i = 0; i < popUpWindows.length; i++) {
+          const popUp = popUpWindows[i];
+          if (popUp.isExpanded) {
+            popUp.clearCanvas();
+          }
+        }
+      }
+    }
+  </script>
 </body>
 
 </html>

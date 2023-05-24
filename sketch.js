@@ -14,9 +14,13 @@ let btnSave, btnClear;
 let btnUndo, btnRedo;
 
 const DIM = 1000;
+const CANVAS_WIDTH = 200;
+const CANVAS_HEIGHT = 200;
+const NUM_CANVASES = 5;
 
 let bgImage;
 let savedStrokes = [];
+let canvasList = [];
 
 function preload() {
   bgImage = loadImage("thumbnail_east_core_1916-1925.jpg");
@@ -26,7 +30,7 @@ function setup() {
   windowScale = DIM / 1000;
   fontsize = 24 * windowScale;
 
-  createCanvas(DIM, DIM + fontsize);
+  createCanvas(windowWidth, windowHeight);
   gfx = createGraphics(DIM, DIM);
   gfx.background(255);
 
@@ -74,7 +78,36 @@ function setup() {
 
   gfx.noStroke();
   gfx.image(bgImage, 0, 0);
+
+  // Create an array to hold the canvas elements
+  canvasList = [];
+
+  // Add five little canvases
+  for (let i = 0; i < 5; i++) {
+    let canvas = createGraphics(CANVAS_WIDTH, CANVAS_HEIGHT);
+    canvas.position(DIM + 10, i * (CANVAS_HEIGHT + 10) + 24);
+    canvas.background(255);
+    canvasList.push(canvas);
+  }
+
+  // Add mouse click event listener
+  canvasList.forEach((canvas, index) => {
+    canvas.mouseClicked(() => {
+      if (expandedIndex === -1) {
+        // Expand the canvas to full screen
+        canvas.resize(windowWidth, windowHeight);
+        canvas.position(0, 0);
+        expandedIndex = index;
+      } else {
+        // Restore the canvas to its original size and position
+        canvas.resize(CANVAS_WIDTH, CANVAS_HEIGHT);
+        canvas.position(DIM + 10, index * (CANVAS_HEIGHT + 10) + 24);
+        expandedIndex = -1;
+      }
+    });
+  });
 }
+
 
 function draw() {
   if (dirty) {
@@ -90,6 +123,28 @@ function draw() {
     dirty = true;
   }
   if (debounce > 0) debounce--;
+
+  // Draw additional canvases
+  for (let i = 0; i < NUM_CANVASES; i++) {
+    let canvas = canvasList[i];
+    canvas.clear();
+    canvas.background(255);
+    canvas.image(bgImage, 0, 0);
+    canvas.noFill();
+    canvas.stroke(0);
+    canvas.rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    if (currentStroke !== null) {
+      let stroke = currentStroke;
+      canvas.strokeWeight(stroke.size);
+      canvas.stroke(stroke.color);
+      for (let j = 0; j < stroke.points.length - 1; j++) {
+        let startPoint = stroke.points[j];
+        let endPoint = stroke.points[j + 1];
+        canvas.line(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
+      }
+    }
+    image(canvas, DIM + 10, (CANVAS_HEIGHT + 10) * i + fontsize + 10);
+  }
 }
 
 function saveImg() {
@@ -103,6 +158,14 @@ function clearImg() {
   gfx.image(bgImage, 0, 0);
   strokes = [];
   savedStrokes = [];
+
+  // Clear additional canvases
+  for (let i = 0; i < NUM_CANVASES; i++) {
+    let canvas = canvasList[i];
+    canvas.clear();
+    canvas.background(255);
+    canvas.image(bgImage, 0, 0);
+  }
 }
 
 function changeStroke() {
