@@ -1,6 +1,3 @@
-// font: https://fonts.google.com/specimen/Nerko+One
-// https://support.google.com/chrome/thread/20108907/how-to-stop-desktop-browser-chrome-from-interpreting-my-wacom-tablet-as-a-touchscreen?hl=en
-
 let strokes = [];
 let currentStroke = null;
 let gfx;
@@ -12,7 +9,9 @@ let dirty = true;
 let colorPicker, sizeSlider;
 let btnSave, btnClear;
 let btnUndo, btnRedo;
+let mapContainer;
 
+const mapboxAccessToken = 'pk.eyJ1IjoiZ29vZGxpbmEiLCJhIjoiY2xpM2F2ZGlpMGxseDNnbnRqMWl1c3A3bCJ9.WMJlwaLWmoNc-YuSv-92Ow';
 const DIM = 1000;
 const CANVAS_WIDTH = 200;
 const CANVAS_HEIGHT = 200;
@@ -21,6 +20,7 @@ const NUM_CANVASES = 5;
 let bgImage;
 let savedStrokes = [];
 let canvasList = [];
+let expandedIndex = -1;
 
 function preload() {
   bgImage = loadImage("thumbnail_east_core_1916-1925.jpg");
@@ -36,6 +36,38 @@ function setup() {
 
   bgImage.resize(0, DIM);
 
+  let hollandLatitude = 42.78;
+  let hollandLongitude = -86.1089;
+  const zoomLevel = 12; // Replace with your desired zoom level
+
+  // Create a container div for the map
+  mapContainer = createDiv();
+  mapContainer.style('position', 'absolute');
+  mapContainer.style('top', '0');
+  mapContainer.style('right', '0');
+  mapContainer.style('bottom', '0');
+  mapContainer.style('left', '50%');
+
+  // Add the map
+  const map = new mapboxgl.Map({
+    container: mapContainer.elt,
+    style: 'mapbox://styles/mapbox/streets-v11',
+    center: [hollandLongitude, hollandLatitude],
+    zoom: zoomLevel,
+    accessToken: mapboxAccessToken
+  });
+
+  // Set up event listeners for map interactions
+  map.on('load', () => {
+    // Map is ready
+    console.log('Map loaded!');
+  });
+
+  // Resize the map when the window size changes
+  window.addEventListener('resize', () => {
+    map.resize();
+  });
+
   strokes = [];
 
   textFont("Arial");
@@ -49,196 +81,188 @@ function setup() {
 
   colorPicker = createColorPicker(color(20));
   colorPicker.mouseClicked(changeStroke);
-  colorPicker.position(width - fontsize, 0).size(fontsize, fontsize);
+  colorPicker.position(CANVAS_WIDTH*2, 40).size(fontsize, fontsize);
   gfx.fill(colorPicker.color());
 
   sizeSlider = createSlider(1, 20 * windowScale, 1, 1);
-  sizeSlider.position(width - fontsize - 90, 0);
+  sizeSlider.position(CANVAS_WIDTH*2 + fontsize + 10, 40);
   sizeSlider.style("width", "80px");
 
+  let buttonsContainer = createDiv();
+  buttonsContainer.id('buttons');
+  buttonsContainer.child(colorPicker);
+  buttonsContainer.child(sizeSlider);
+  buttonsContainer.position(0, 0);
+
   let titleWidth = drawHeader();
+    
   btnSave = createButton("Save");
   btnSave.mousePressed(saveImg);
-  btnSave.position(titleWidth + 10, 1);
+  btnSave.parent(buttonsContainer);
+  btnSave.position(10, fontsize + 40);
 
   btnClear = createButton("Clear");
   btnClear.mousePressed(clearImg);
-  btnClear.position(
-    btnSave.size().width + btnSave.size().width + titleWidth - 25,
-    1
-  );
+  btnClear.parent(buttonsContainer);
+  btnClear.position(10, btnSave.position().y + btnSave.size().height + 10);
 
   btnUndo = createButton("Undo");
   btnUndo.mousePressed(undo);
-  btnUndo.position(btnClear.position().x + btnClear.size().width + 10, 1);
+  btnUndo.parent(buttonsContainer);
+  btnUndo.position(10, btnClear.position().y + btnClear.size().height + 10);
 
   btnRedo = createButton("Redo");
   btnRedo.mousePressed(redo);
-  btnRedo.position(btnUndo.position().x + btnUndo.size().width + 10, 1);
+  btnRedo.parent(buttonsContainer);
+  btnRedo.position(10, btnUndo.position().y + btnUndo.size().height + 10);
 
-  gfx.noStroke();
-  gfx.image(bgImage, 0, 0);
+  canvasList.push(gfx.get());
 
-  // Create an array to hold the canvas elements
-  canvasList = [];
-
-  // Add five little canvases
-  for (let i = 0; i < 5; i++) {
-    let canvas = createGraphics(CANVAS_WIDTH, CANVAS_HEIGHT);
-    canvas.position(DIM + 10, i * (CANVAS_HEIGHT + 10) + 24);
-    canvas.background(255);
-    canvasList.push(canvas);
-  }
-
-  // Add mouse click event listener
-  canvasList.forEach((canvas, index) => {
-    canvas.mouseClicked(() => {
-      if (expandedIndex === -1) {
-        // Expand the canvas to full screen
-        canvas.resize(windowWidth, windowHeight);
-        canvas.position(0, 0);
-        expandedIndex = index;
-      } else {
-        // Restore the canvas to its original size and position
-        canvas.resize(CANVAS_WIDTH, CANVAS_HEIGHT);
-        canvas.position(DIM + 10, index * (CANVAS_HEIGHT + 10) + 24);
-        expandedIndex = -1;
-      }
-    });
-  });
+  gfx.background(255);
 }
-
 
 function draw() {
-  if (dirty) {
-    background(255);
-    image(gfx, 0, 24);
-    drawHeader();
-    dirty = false;
-  }
+  let saveFlag = false;
+  if (mouseIsPressed && expandedIndex === -1) {
+    let x = mouseX;
+    let y = mouseY;
 
-  if (keyIsDown(CONTROL) && keyIsDown(90) && debounce == 0) {
-    undo();
-    debounce = debounceDelay;
-    dirty = true;
-  }
-  if (debounce > 0) debounce--;
+    if (x < CANVAS_WIDTH && y < CANVAS_HEIGHT) {
+      let c = gfx.get(x, y);
+      let alphaValue = (c[0] + c[1] + c[2]) / 3;
 
-  // Draw additional canvases
-  for (let i = 0; i < NUM_CANVASES; i++) {
-    let canvas = canvasList[i];
-    canvas.clear();
-    canvas.background(255);
-    canvas.image(bgImage, 0, 0);
-    canvas.noFill();
-    canvas.stroke(0);
-    canvas.rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-    if (currentStroke !== null) {
-      let stroke = currentStroke;
-      canvas.strokeWeight(stroke.size);
-      canvas.stroke(stroke.color);
-      for (let j = 0; j < stroke.points.length - 1; j++) {
-        let startPoint = stroke.points[j];
-        let endPoint = stroke.points[j + 1];
-        canvas.line(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
+      if (alphaValue > 0) {
+        saveFlag = true;
+        dirty = true;
+        if (currentStroke == null) {
+          currentStroke = new Stroke(
+            colorPicker.color(),
+            sizeSlider.value(),
+            x,
+            y
+          );
+        } else {
+          currentStroke.addPoint(x, y);
+        }
+        gfx.stroke(currentStroke.color);
+        gfx.strokeWeight(currentStroke.size);
+        gfx.line(
+          currentStroke.x[currentStroke.x.length - 1],
+          currentStroke.y[currentStroke.y.length - 1],
+          x,
+          y
+        );
+        image(gfx, 0, 0);
+        if (debounce === 0) {
+          debounce = debounceDelay;
+          savedStrokes = [];
+          for (let i = 0; i < strokes.length; i++) {
+            savedStrokes.push(strokes[i].clone());
+          }
+        }
       }
     }
-    image(canvas, DIM + 10, (CANVAS_HEIGHT + 10) * i + fontsize + 10);
   }
-}
 
-function saveImg() {
-  gfx.save("image.png");
-}
+  debounce--;
 
-function clearImg() {
-  dirty = true;
-  gfx.clear();
-  gfx.background(255);
-  gfx.image(bgImage, 0, 0);
-  strokes = [];
-  savedStrokes = [];
+  if (debounce === 0 && saveFlag) {
+    saveFlag = false;
+    strokes.push(currentStroke);
+    currentStroke = null;
+  }
 
-  // Clear additional canvases
-  for (let i = 0; i < NUM_CANVASES; i++) {
-    let canvas = canvasList[i];
-    canvas.clear();
-    canvas.background(255);
-    canvas.image(bgImage, 0, 0);
+  if (dirty) {
+    dirty = false;
+    redrawThumbnails();
+  }
+
+  if (expandedIndex !== -1) {
+    background(255);
+    image(canvasList[expandedIndex], 0, 0);
   }
 }
 
 function changeStroke() {
-  dirty = true;
-}
-
-function drawHeader() {
-  let hdr = "GVSU Walk-and-Draw";
-  text(hdr, 3, fontsize / 2);
-  line(0, fontsize, width, fontsize);
-
-  return textWidth(hdr) + 3;
-}
-
-function mouseDragged() {
-  let x = mouseX;
-  let y = mouseY - fontsize;
-
-  if (y > fontsize) {
-    if (currentStroke === null) {
-      currentStroke = {
-        size: sizeSlider.value(),
-        color: colorPicker.color().toString(),
-        points: [],
-      };
-      strokes.push(currentStroke);
-    }
-
-    currentStroke.points.push({ x: x, y: y });
-    drawLine(currentStroke.points.length - 2, currentStroke.points.length - 1);
-  }
-}
-
-function drawLine(startIndex, endIndex) {
-  let stroke = currentStroke;
-  gfx.strokeWeight(stroke.size);
-  gfx.stroke(stroke.color);
-  let startPoint = stroke.points[startIndex];
-  let endPoint = stroke.points[endIndex];
-  gfx.line(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
-  dirty = true;
-}
-
-function mouseReleased() {
-  currentStroke = null;
+  gfx.fill(this.color());
 }
 
 function undo() {
-  if (strokes.length > 0) {
-    savedStrokes.push(strokes.pop());
-    redrawCanvas();
+  if (expandedIndex === -1) {
+    if (strokes.length > 0) {
+      savedStrokes.push(strokes.pop());
+      redrawThumbnails();
+    }
   }
 }
 
 function redo() {
-  if (savedStrokes.length > 0) {
-    strokes.push(savedStrokes.pop());
-    redrawCanvas();
+  if (expandedIndex === -1) {
+    if (savedStrokes.length > 0) {
+      strokes.push(savedStrokes.pop());
+      redrawThumbnails();
+    }
   }
 }
 
-function redrawCanvas() {
-  gfx.clear();
-  gfx.background(255);
-  gfx.image(bgImage, 0, 0);
-  for (let stroke of strokes) {
-    gfx.strokeWeight(stroke.size);
-    gfx.stroke(stroke.color);
-    for (let i = 0; i < stroke.points.length - 1; i++) {
-      let startPoint = stroke.points[i];
-      let endPoint = stroke.points[i + 1];
-      gfx.line(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
+function saveImg() {
+  if (expandedIndex !== -1) {
+    save(gfx, "map_drawing.png");
+  }
+}
+
+function clearImg() {
+  if (expandedIndex === -1) {
+    gfx.background(255);
+    strokes = [];
+    savedStrokes = [];
+    redrawThumbnails();
+  }
+}
+
+function redrawThumbnails() {
+  let tileWidth = (width - CANVAS_WIDTH) / NUM_CANVASES;
+  let tileHeight = CANVAS_HEIGHT / NUM_CANVASES;
+
+  for (let i = 0; i < strokes.length; i++) {
+    canvasList[i] = createGraphics(CANVAS_WIDTH, CANVAS_HEIGHT);
+    canvasList[i].background(255);
+    let s = strokes[i];
+    canvasList[i].stroke(s.color);
+    canvasList[i].strokeWeight(s.size);
+    for (let j = 1; j < s.x.length; j++) {
+      canvasList[i].line(s.x[j - 1], s.y[j - 1], s.x[j], s.y[j]);
     }
   }
-  dirty = true;
+
+  background(255);
+  image(gfx, 0, 0);
+
+  for (let i = 0; i < canvasList.length; i++) {
+    let x = CANVAS_WIDTH + (i % NUM_CANVASES) * tileWidth;
+    let y = (i % NUM_CANVASES) * tileHeight;
+    let w = tileWidth;
+    let h = tileHeight;
+
+    if (i === expandedIndex) {
+      w = CANVAS_WIDTH;
+      h = CANVAS_HEIGHT;
+    }
+
+    image(canvasList[i], x, y, w, h);
+  }
+}
+
+function drawHeader() {
+  let headerHeight = fontsize + 10;
+  fill(220);
+  rect(0, 0, CANVAS_WIDTH, headerHeight);
+
+  let title = "Map Drawing App";
+  let titleWidth = textWidth(title);
+
+  fill(0);
+  text(title, CANVAS_WIDTH / 2 - titleWidth / 2, headerHeight / 2);
+
+  return titleWidth;
 }
