@@ -1,9 +1,8 @@
-html,
-body {
-    margin: 10;
-    padding: 10;
-}
-
-canvas {
-    display: block;
+.map-marker {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: blue;
+  transform: translate(-50%, -50%);
 }

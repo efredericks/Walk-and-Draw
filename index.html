@@ -9,12 +9,29 @@
   <link href='https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.css' rel='stylesheet' />
 
   <meta charset="utf-8" />
+  <style>
+    #canvasContainer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 300px; /* Adjust the width as needed */
+      height: 100vh;
+      background-color: white;
+    }
+
+    #mapContainer {
+      position: absolute;
+      top: 0;
+      left: 300px; /* Adjust the value to match the width of the canvas container */
+      right: 0;
+      bottom: 0;
+    }
+  </style>
 </head>
 
 <body>
   <main>
     <div id="canvasContainer">
-      <h1>GVSU Walk-and-Draw</h1>
     </div>
     <div id="mapContainer"></div>
   </main>
