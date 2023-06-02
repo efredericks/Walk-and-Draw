@@ -1,3 +1,9 @@
+// font: https://fonts.google.com/specimen/Nerko+One
+// https://support.google.com/chrome/thread/20108907/how-to-stop-desktop-browser-chrome-from-interpreting-my-wacom-tablet-as-a-touchscreen?hl=en
+
+let strokes = [];
+let currentStroke = null;
+let gfx;
 let debounceDelay = 5; //15;
 let debounce = 0;
 let font, fontsize;
@@ -6,23 +12,83 @@ let dirty = true;
 let colorPicker, sizeSlider;
 let btnSave, btnClear;
 let btnUndo, btnRedo;
-let mapContainer;
 
-const mapboxAccessToken = 'pk.eyJ1IjoiZ29vZGxpbmEiLCJhIjoiY2xpM2F2ZGlpMGxseDNnbnRqMWl1c3A3bCJ9.WMJlwaLWmoNc-YuSv-92Ow';
 const DIM = 1000;
-const CANVAS_WIDTH = 200;
-const CANVAS_HEIGHT = 200;
-
-let bgImage;
-let gfx;
+//map things
 let map;
-let mapMarker;
-let markerInterval;
+const mapboxAccessToken = 'pk.eyJ1IjoiZ29vZGxpbmEiLCJhIjoiY2xpM2F2ZGlpMGxseDNnbnRqMWl1c3A3bCJ9.WMJlwaLWmoNc-YuSv-92Ow';
+let hollandLatitude = 42.78;
+let hollandLongitude = -86.1089;
+const zoomLevel = 12;
 
-function preload() {
-  bgImage = loadImage("thumbnail_east_core_1916-1925.jpg");
+let marker;
+let currentPosition;
+
+
+//let bgImage;
+let savedStrokes = [];
+let canvasList = [];
+
+function setUpMap() {
+  mapboxgl.accessToken = mapboxAccessToken;
+  map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/streets-v11',
+    center: [hollandLongitude, hollandLatitude],
+    zoom: zoomLevel
+  });
+
+  map.on('load', () => {
+    map.addSource('current-location', {
+      type: 'geojson',
+      data: {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [hollandLongitude, hollandLatitude]
+        }
+      }
+    });
+
+    map.addLayer({
+      id: 'current-location',
+      type: 'circle',
+      source: 'current-location',
+      paint: {
+        'circle-radius': 5,
+        'circle-color': 'blue',
+        'circle-stroke-width': 2,
+        'circle-stroke-color': 'white'
+      }
+    });
+  });
+
+  if (navigator.geolocation) {
+    navigator.geolocation.watchPosition(position => {
+      hollandLatitude = position.coords.latitude;
+      hollandLongitude = position.coords.longitude;
+      updateDotPosition();
+    });
+  }
 }
 
+function updateDotPosition() {
+  map.getSource('current-location').setData({
+    type: 'Feature',
+    geometry: {
+      type: 'Point',
+      coordinates: [hollandLongitude, hollandLatitude]
+    }
+  });
+}
+
+function trackCurrentLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.watchPosition(position => {
+      currentPosition = position;
+    });
+  }
+}
 function setup() {
   windowScale = DIM / 1000;
   fontsize = 24 * windowScale;
@@ -31,40 +97,9 @@ function setup() {
   gfx = createGraphics(DIM, DIM);
   gfx.background(255);
 
-  bgImage.resize(0, DIM);
+  //bgImage.resize(0, DIM);
 
-  let hollandLatitude = 42.78;
-  let hollandLongitude = -86.1089;
-  const zoomLevel = 12; // Replace with your desired zoom level
-
-  // Create a container div for the map
-  mapContainer = createDiv();
-  mapContainer.style('position', 'absolute');
-  mapContainer.style('top', '0');
-  mapContainer.style('right', '0');
-  mapContainer.style('bottom', '0');
-  mapContainer.style('left', '50%');
-
-  // Add the map
-  map = new mapboxgl.Map({
-    container: mapContainer.elt,
-    style: 'mapbox://styles/mapbox/streets-v11',
-    center: [hollandLongitude, hollandLatitude],
-    zoom: zoomLevel,
-    accessToken: mapboxAccessToken
-  });
-
-  // Set up event listeners for map interactions
-  map.on('load', () => {
-    // Map is ready
-    console.log('Map loaded!');
-    startLocationTracking();
-  });
-
-  // Resize the map when the window size changes
-  window.addEventListener('resize', () => {
-    map.resize();
-  });
+  strokes = [];
 
   textFont("Arial");
   gfx.textFont("Arial");
@@ -75,145 +110,154 @@ function setup() {
 
   frameRate(60);
 
+  
+
+  let titleWidth = drawHeader();
+  //Save Button 
+  btnSave = createButton("Save");
+  btnSave.mousePressed(saveImg);
+  btnSave.position(titleWidth + 10, 1);
+    
+  //Clear Button
+  btnClear = createButton("Clear");
+  btnClear.mousePressed(clearImg);
+  btnClear.position(
+    btnSave.size().width + btnSave.size().width + titleWidth - 25,
+    1
+  );
+  //Undo Button
+  btnUndo = createButton("Undo");
+  btnUndo.mousePressed(undo);
+  btnUndo.position(btnClear.position().x + btnClear.size().width + 10, 1);
+  //Redo Button
+  btnRedo = createButton("Redo");
+  btnRedo.mousePressed(redo);
+  btnRedo.position(btnUndo.position().x + btnUndo.size().width + 10, 1);
+    
   colorPicker = createColorPicker(color(20));
   colorPicker.mouseClicked(changeStroke);
-  colorPicker.position(width - fontsize, 0).size(fontsize, fontsize);
+  colorPicker.position(20, 40).size(fontsize, fontsize);
   gfx.fill(colorPicker.color());
 
   sizeSlider = createSlider(1, 20 * windowScale, 1, 1);
-  sizeSlider.position(width - fontsize - 90, 0);
+  sizeSlider.position(45, 40);
   sizeSlider.style("width", "80px");
 
-  let buttonsContainer = createDiv();
-  buttonsContainer.id('buttons');
-  buttonsContainer.child(colorPicker);
-  buttonsContainer.child(sizeSlider);
-  buttonsContainer.position(0, 0);
 
-  let titleWidth = drawHeader();
-  btnSave = createButton("Save");
-  btnSave.mousePressed(saveImg);
-  btnSave.parent(buttonsContainer);
-  btnSave.position(10, fontsize + 30);
-
-  btnClear = createButton("Clear");
-  btnClear.mousePressed(clearImg);
-  btnClear.parent(buttonsContainer);
-  btnClear.position(10, btnSave.position().y + btnSave.size().height + 10);
-
-  btnUndo = createButton("Undo");
-  btnUndo.mousePressed(undo);
-  btnUndo.parent(buttonsContainer);
-  btnUndo.position(10, btnClear.position().y + btnClear.size().height + 10);
-
-  btnRedo = createButton("Redo");
-  btnRedo.mousePressed(redo);
-  btnRedo.parent(buttonsContainer);
-  btnRedo.position(10, btnUndo.position().y + btnUndo.size().height + 10);
-
-  gfx.background(255);
+  gfx.noStroke();
+  //gfx.image(bgImage, 0, 0);
+ setUpMap();
+ trackCurrentLocation();
+    
+ 
 }
+
 
 function draw() {
   if (dirty) {
-    clear();
-    let headerWidth = drawHeader();
-    image(gfx, 0, 0, headerWidth, CANVAS_HEIGHT);
+    background(255);
+    image(gfx, 0, 24);
+    drawHeader();
     dirty = false;
   }
-}
-
-function changeStroke() {
-  gfx.fill(this.color());
-}
-
-function undo() {
-  gfx.background(255);
-  redraw();
-}
-
-function redo() {
-  // Not implemented
+ 
+  if (keyIsDown(CONTROL) && keyIsDown(90) && debounce == 0) {
+    undo();
+    debounce = debounceDelay;
+    dirty = true;
+  }
+  if (debounce > 0) debounce--;
+    
+    //updateDotPosition();
 }
 
 function saveImg() {
-  save(gfx, "map_drawing.png");
+  gfx.save("image.png");
 }
 
 function clearImg() {
+  dirty = true;
+  gfx.clear();
   gfx.background(255);
-  redraw();
+  //gfx.image(bgImage, 0, 0);
+  strokes = [];
+  savedStrokes = [];
+
+}
+
+function changeStroke() {
+  dirty = true;
 }
 
 function drawHeader() {
-  let title = "GVSU Walk and Draw";
+  let hdr = "GVSU Walk-and-Draw";
+  text(hdr, 3, fontsize / 2);
+  line(0, fontsize, width, fontsize);
 
-  let titleWidth = textWidth(title);
-
-  fill(255);
-  rect(0, 0, CANVAS_WIDTH, fontsize + 10);
-
-  fill(0);
-  text(title, (titleWidth), fontsize);
-
-  return titleWidth;
+  return textWidth(hdr) + 3;
 }
 
-function mousePressed() {
+function mouseDragged() {
   let x = mouseX;
-  let y = mouseY;
+  let y = mouseY - fontsize;
 
-  if (x < CANVAS_WIDTH && y < CANVAS_HEIGHT) {
-    gfx.fill(colorPicker.color());
-    gfx.noStroke();
-    gfx.ellipse(x, y, sizeSlider.value(), sizeSlider.value());
+  if (y > fontsize) {
+    if (currentStroke === null) {
+      currentStroke = {
+        size: sizeSlider.value(),
+        color: colorPicker.color().toString(),
+        points: [],
+      };
+      strokes.push(currentStroke);
+    }
+
+    currentStroke.points.push({ x: x, y: y });
+    drawLine(currentStroke.points.length - 2, currentStroke.points.length - 1);
+  }
+}
+
+function drawLine(startIndex, endIndex) {
+  let stroke = currentStroke;
+  gfx.strokeWeight(stroke.size);
+  gfx.stroke(stroke.color);
+  
+  if (startIndex >= 0 && startIndex < stroke.points.length && endIndex >= 0 && endIndex < stroke.points.length) {
+    let startPoint = stroke.points[startIndex];
+    let endPoint = stroke.points[endIndex];
+    gfx.line(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
     dirty = true;
   }
 }
+function mouseReleased() {
+  currentStroke = null;
+}
 
-function startLocationTracking() {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { longitude, latitude } = position.coords;
-        updateMarkerPosition(longitude, latitude);
-        markerInterval = setInterval(() => {
-          navigator.geolocation.getCurrentPosition(
-            (position) => {
-              const { longitude, latitude } = position.coords;
-              updateMarkerPosition(longitude, latitude);
-            },
-            (error) => {
-              console.error('Error retrieving current location:', error);
-            }
-          );
-        }, 5000);
-      },
-      (error) => {
-        console.error('Error retrieving current location:', error);
-      }
-    );
-  } else {
-    console.error('Geolocation is not supported by this browser.');
+function undo() {
+  if (strokes.length > 0) {
+    savedStrokes.push(strokes.pop());
+    redrawCanvas();
   }
 }
 
-function updateMarkerPosition(longitude, latitude) {
-  if (mapMarker) {
-    mapMarker.setLngLat([longitude, latitude]);
-  } else {
-    const markerElement = document.createElement('div');
-    markerElement.style.width = '12px';
-    markerElement.style.height = '12px';
-    markerElement.style.borderRadius = '50%';
-    markerElement.style.backgroundColor = 'blue';
-
-    mapMarker = new mapboxgl.Marker(markerElement)
-      .setLngLat([longitude, latitude])
-      .addTo(map);
+function redo() {
+  if (savedStrokes.length > 0) {
+    strokes.push(savedStrokes.pop());
+    redrawCanvas();
   }
 }
 
-function stopLocationTracking() {
-  clearInterval(markerInterval);
+function redrawCanvas() {
+  gfx.clear();
+  gfx.background(255);
+  //gfx.image(bgImage, 0, 0);
+  for (let stroke of strokes) {
+    gfx.strokeWeight(stroke.size);
+    gfx.stroke(stroke.color);
+    for (let i = 0; i < stroke.points.length - 1; i++) {
+      let startPoint = stroke.points[i];
+      let endPoint = stroke.points[i + 1];
+      gfx.line(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
+    }
+  }
+  dirty = true;
 }

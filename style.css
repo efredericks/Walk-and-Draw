@@ -1,8 +1,9 @@
-.map-marker {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background-color: blue;
-  transform: translate(-50%, -50%);
+html,
+body {
+    margin: 0;
+    padding: 0;
+}
+
+canvas {
+    display: block;
 }
