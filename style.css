@@ -17,7 +17,8 @@ canvas {
   cursor: pointer;
 }
 .button-container {
-
+ display: grid;
+ grid-template-columns: repeat(1,auto);
   grid-gap: 10px;
   position: absolute; /* Add this property to position the container */
   top: 4%; /* Adjust the top position as needed */
@@ -41,5 +42,36 @@ canvas {
     grid-template-columns: repeat(3,auto);
     grid-gap: 10px;
     position: absolute;
-    top: 9%;
+    top: 4%;
+    left: 10%;
+}
+.stroke-controller{
+    position: absolute;
+    top: 4%;
+    left: 35%;
+    
+}
+.stroke-controller select {
+    position: absolute;
+     
+  width: 200px;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  color: #333;
+  
+}
+
+.stroke-controller option {
+  padding: 5px;
+  font-size: 14px;
+  background-color: #fff;
+  color: #333;
+}
+
+.stroke-controller option:checked {
+  background-color: #f5f5f5;
+  font-weight: bold;
 }
