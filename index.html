@@ -15,10 +15,10 @@
         }
         #map {
             position: absolute;
-            top: 3.2%;
-            bottom: 2%;
-            left: 49%;
-            width: 100%;
+            top: 0.0%;
+            bottom: 0%;
+            left: 50%;
+            width: 50%;
         }
     </style>
 </head>
@@ -27,17 +27,22 @@
     <div id="map"></div>
 
     <!-- Buttons -->
+    <div class="button-container">
     <button id="btnSave" onclick="saveImg()">Save</button>
     <button id="btnClear" onclick="clearImg()">Clear</button>
-
-    <button id="btnUndo" onclick="undo()">Undo</button>
+        <button id="btnUndo" onclick="undo()">Undo</button>
     <button id="btnRedo" onclick="redo()">Redo</button>
 
-    <!-- Slider -->
+    </div>
+    <!-- Sliders -->
+    <div class= "slider-container">
+    
     <label for="sliderSize">Pen Size:</label>
-    <input type="range" id="sizeSlider" min="1" max="10" value="5">
     <input type="color" id="colorPicker" value="#000000">
-
+    <input type="range" id="sizeSlider" min="1" max="10" value="5">
+    <label for="backgroundColorPicker">Background</label>
+    <input type="color" id= "backgroundColorPicker" value="#000000">
+    </div>
 
     <script src="sketch.js"></script>
 </body>

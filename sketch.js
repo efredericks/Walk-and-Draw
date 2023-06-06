@@ -10,8 +10,9 @@ let debounce = 0;
 let font, fontsize;
 let windowScale;
 let dirty = true;
-let colorPicker, sizeSlider;
+let colorPicker, sizeSlider, backgroundColorPicker;
 let btnSave, btnClear, btnUndo, btnRedo;
+let backgroundColor = "#FFFFFF"; // Initial background color (white)
 
 const DIM = 1000;
 //map things
@@ -91,7 +92,7 @@ function setup() {
 
   createCanvas(windowWidth, windowHeight);
   gfx = createGraphics(DIM, DIM);
-  gfx.background(255);
+  gfx.background(backgroundColor);
 
   textFont('Arial');
   gfx.textFont('Arial');
@@ -110,28 +111,35 @@ function setup() {
   btnRedo = document.getElementById('btnRedo');
   colorPicker = document.getElementById('colorPicker');
   sizeSlider = document.getElementById('sizeSlider');
+  backgroundColorPicker = document.getElementById('backgroundColorPicker');
 
- // btnSave.addEventListener('click', saveImg);
- // btnClear.addEventListener('click', clearImg);
-  //btnUndo.addEventListener('click', undo);
- // btnRedo.addEventListener('click', redo);
+  backgroundColorPicker.value = backgroundColor; // Set initial background color picker value
 
-    
+  colorPicker.addEventListener('input', changeStroke);
+  sizeSlider.addEventListener('input', changeStroke);
+  backgroundColorPicker.addEventListener('input', changeBackgroundColor);
 
   gfx.noStroke();
   setUpMap();
   trackCurrentLocation();
 }
 
+function changeBackgroundColor() {
+  backgroundColor = backgroundColorPicker.value;
+  gfx.background(backgroundColor);
+  redrawCanvas();
+  dirty = true;
+}
+
 function draw() {
   if (dirty) {
-    background(255);
+    background(backgroundColor);
     image(gfx, 0, 24);
     drawHeader();
     dirty = false;
   }
 
-  if (keyIsDown(CONTROL) && keyIsDown(90) && debounce == 0) {
+  if (keyIsDown(CONTROL) && keyIsDown(90) && debounce === 0) {
     undo();
     debounce = debounceDelay;
     dirty = true;
@@ -146,7 +154,7 @@ function saveImg() {
 function clearImg() {
   dirty = true;
   gfx.clear();
-  gfx.background(255);
+  gfx.background(backgroundColor);
   strokes = [];
 }
 
@@ -157,7 +165,6 @@ function changeStroke() {
     dirty = true;
   }
 }
-
 
 function drawHeader() {
   let hdr = 'GVSU Walk-and-Draw';
@@ -185,7 +192,6 @@ function mouseDragged() {
     drawLine(currentStroke.points.length - 2, currentStroke.points.length - 1);
   }
 }
-
 
 function drawLine(startIndex, endIndex) {
   let stroke = currentStroke;
@@ -227,8 +233,7 @@ function redo() {
 
 function redrawCanvas() {
   gfx.clear();
-  gfx.background(255);
-  //gfx.image(bgImage, 0, 0);
+  gfx.background(backgroundColor);
   for (let stroke of strokes) {
     gfx.strokeWeight(stroke.size);
     gfx.stroke(stroke.color);
