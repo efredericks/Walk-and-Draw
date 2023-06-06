@@ -3,7 +3,6 @@
 
 <head>
     <meta charset="UTF-8" />
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.5.0/p5.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.5.0/addons/p5.sound.min.js"></script>
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.5.1/mapbox-gl.js"></script>
@@ -19,14 +18,27 @@
             top: 3.2%;
             bottom: 2%;
             left: 49%;
-            width: 50%;
+            width: 100%;
         }
     </style>
-
 </head>
 
 <body>
     <div id="map"></div>
+
+    <!-- Buttons -->
+    <button id="btnSave" onclick="saveImg()">Save</button>
+    <button id="btnClear" onclick="clearImg()">Clear</button>
+
+    <button id="btnUndo" onclick="undo()">Undo</button>
+    <button id="btnRedo" onclick="redo()">Redo</button>
+
+    <!-- Slider -->
+    <label for="sliderSize">Pen Size:</label>
+    <input type="range" id="sizeSlider" min="1" max="10" value="5">
+    <input type="color" id="colorPicker" value="#000000">
+
+
     <script src="sketch.js"></script>
 </body>
 
