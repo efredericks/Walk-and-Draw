@@ -13,7 +13,7 @@ let dirty = true;
 let colorPicker, sizeSlider, backgroundColorPicker;
 let btnSave, btnClear, btnUndo, btnRedo;
 let backgroundColor = "#FFFFFF"; // Initial background color (white)
-
+let penTip;
 const DIM = 1000;
 //map things
 let map;
@@ -89,7 +89,7 @@ function trackCurrentLocation() {
 function setup() {
   windowScale = DIM / 1000;
   fontsize = 24 * windowScale;
-
+  penTip = 'circle';
   createCanvas(windowWidth, windowHeight);
   gfx = createGraphics(DIM, DIM);
   gfx.background(backgroundColor);
@@ -118,10 +118,16 @@ function setup() {
   colorPicker.addEventListener('input', changeStroke);
   sizeSlider.addEventListener('input', changeStroke);
   backgroundColorPicker.addEventListener('input', changeBackgroundColor);
+  btnUndo.addEventListener('click', undo);
+  btnRedo.addEventListener('click', redo);
 
   gfx.noStroke();
   setUpMap();
   trackCurrentLocation();
+}
+
+function changePenTip() {
+  penTip = document.getElementById('penTipSelect').value;
 }
 
 function changeBackgroundColor() {
@@ -183,6 +189,7 @@ function mouseDragged() {
       currentStroke = {
         size: sizeSlider.value,
         color: colorPicker.value,
+        shape: penTip, // Store the shape of the brush
         points: [],
       };
       strokes.push(currentStroke);
@@ -206,27 +213,56 @@ function drawLine(startIndex, endIndex) {
   ) {
     let startPoint = stroke.points[startIndex];
     let endPoint = stroke.points[endIndex];
-    gfx.line(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
+
+    if (penTip === 'circle') {
+      gfx.circle(endPoint.x, endPoint.y, stroke.size);
+    } else if (penTip === 'square') {
+      gfx.square(endPoint.x, endPoint.y, stroke.size);
+    } else if (penTip === 'triangle') {
+      let halfSize = stroke.size / 2;
+      let angle = atan2(endPoint.y - startPoint.y, endPoint.x - startPoint.x);
+
+      let x1 = endPoint.x + cos(angle) * halfSize;
+      let y1 = endPoint.y + sin(angle) * halfSize;
+      let x2 = endPoint.x + cos(angle + (2 * PI / 3)) * halfSize;
+      let y2 = endPoint.y + sin(angle + (2 * PI / 3)) * halfSize;
+      let x3 = endPoint.x + cos(angle + (4 * PI / 3)) * halfSize;
+      let y3 = endPoint.y + sin(angle + (4 * PI / 3)) * halfSize;
+
+      gfx.triangle(x1, y1, x2, y2, x3, y3);
+    }
+
+    // Set the shape property of the current stroke
+    stroke.shape = penTip;
+
     dirty = true;
   }
 }
 
+
+
 function mouseReleased() {
-  currentStroke = null;
+  if (currentStroke !== null) {
+    strokes.push(currentStroke);
+    currentStroke = null;
+    savedStrokes = []; // Clear the savedStrokes array
+  }
 }
+
 
 function undo() {
   if (strokes.length > 0) {
     let lastStroke = strokes.pop();
-    savedStrokes.push(lastStroke);
+    savedStrokes.push(lastStroke); // Move the stroke to savedStrokes array
     redrawCanvas();
   }
 }
 
+
 function redo() {
   if (savedStrokes.length > 0) {
     let lastSavedStroke = savedStrokes.pop();
-    strokes.push(lastSavedStroke);
+    strokes.push(lastSavedStroke); // Move the stroke back to strokes array
     redrawCanvas();
   }
 }
@@ -234,14 +270,30 @@ function redo() {
 function redrawCanvas() {
   gfx.clear();
   gfx.background(backgroundColor);
+
+  // Draw strokes from strokes array
   for (let stroke of strokes) {
     gfx.strokeWeight(stroke.size);
     gfx.stroke(stroke.color);
     for (let i = 0; i < stroke.points.length - 1; i++) {
       let startPoint = stroke.points[i];
       let endPoint = stroke.points[i + 1];
-      gfx.line(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
+      drawLine(startPoint, endPoint);
     }
   }
+
+  // Draw saved strokes from savedStrokes array
+  for (let stroke of savedStrokes) {
+    gfx.strokeWeight(stroke.size);
+    gfx.stroke(stroke.color);
+    for (let i = 0; i < stroke.points.length - 1; i++) {
+      let startPoint = stroke.points[i];
+      let endPoint = stroke.points[i + 1];
+      drawLine(startPoint, endPoint);
+    }
+  }
+
   dirty = true;
 }
+
+

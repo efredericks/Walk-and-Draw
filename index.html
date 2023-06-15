@@ -15,8 +15,8 @@
         }
         #map {
             position: absolute;
-            top: 0.0%;
-            bottom: 0%;
+            top: 0;
+            bottom: 0;
             left: 50%;
             width: 50%;
         }
@@ -44,13 +44,14 @@
     <input type="color" id= "backgroundColorPicker" value="#000000">
     
     <label for="aFiller"></label>  
-    <label for="StrokeOptions">Stroke Type:</label>  
-    <select>
-        <option value="option1" selected>Option 1</option>
-        <option value="option2">Option 2</option>
-        <option value="option3">Option 3</option>
-        
-        </select>
+   
+    <label for="penTipSelect">Pen Tip:</label>
+<select id="penTipSelect" onchange="changePenTip()">
+  <option value="circle">Circle</option>
+  <option value="square">Square</option>
+  <option value="triangle">Triangle</option>
+</select>
+
     
     
 </div>
