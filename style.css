@@ -45,33 +45,3 @@ canvas {
     top: 4%;
     left: 10%;
 }
-.stroke-controller{
-    position: absolute;
-    top: 4%;
-    left: 35%;
-    
-}
-.stroke-controller select {
-    position: absolute;
-     
-  width: 200px;
-  padding: 10px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background-color: #fff;
-  color: #333;
-  
-}
-
-.stroke-controller option {
-  padding: 5px;
-  font-size: 14px;
-  background-color: #fff;
-  color: #333;
-}
-
-.stroke-controller option:checked {
-  background-color: #f5f5f5;
-  font-weight: bold;
-}

@@ -92,7 +92,7 @@ function setup() {
   penTip = 'circle';
   createCanvas(windowWidth, windowHeight);
   gfx = createGraphics(DIM, DIM);
-  gfx.background(backgroundColor);
+  gfx.background(255);
 
   textFont('Arial');
   gfx.textFont('Arial');
@@ -111,13 +111,9 @@ function setup() {
   btnRedo = document.getElementById('btnRedo');
   colorPicker = document.getElementById('colorPicker');
   sizeSlider = document.getElementById('sizeSlider');
-  backgroundColorPicker = document.getElementById('backgroundColorPicker');
-
-  backgroundColorPicker.value = backgroundColor; // Set initial background color picker value
 
   colorPicker.addEventListener('input', changeStroke);
   sizeSlider.addEventListener('input', changeStroke);
-  backgroundColorPicker.addEventListener('input', changeBackgroundColor);
   btnUndo.addEventListener('click', undo);
   btnRedo.addEventListener('click', redo);
 
@@ -130,16 +126,8 @@ function changePenTip() {
   penTip = document.getElementById('penTipSelect').value;
 }
 
-function changeBackgroundColor() {
-  backgroundColor = backgroundColorPicker.value;
-  gfx.background(backgroundColor);
-  redrawCanvas();
-  dirty = true;
-}
-
 function draw() {
   if (dirty) {
-    background(backgroundColor);
     image(gfx, 0, 24);
     drawHeader();
     dirty = false;
@@ -160,7 +148,7 @@ function saveImg() {
 function clearImg() {
   dirty = true;
   gfx.clear();
-  gfx.background(backgroundColor);
+  gfx.background(255);
   strokes = [];
 }
 
@@ -196,14 +184,14 @@ function mouseDragged() {
     }
 
     currentStroke.points.push({ x: x, y: y });
-    drawLine(currentStroke.points.length - 2, currentStroke.points.length - 1);
+    drawLine(currentStroke.points[currentStroke.points.length - 2], currentStroke.points[currentStroke.points.length - 1]);
   }
 }
 
 function drawLine(startIndex, endIndex) {
   let stroke = currentStroke;
-  gfx.strokeWeight(stroke.size);
-  gfx.stroke(stroke.color);
+  strokeWeight(stroke.size);
+  stroke(stroke.color);
 
   if (
     startIndex >= 0 &&
@@ -215,9 +203,9 @@ function drawLine(startIndex, endIndex) {
     let endPoint = stroke.points[endIndex];
 
     if (penTip === 'circle') {
-      gfx.circle(endPoint.x, endPoint.y, stroke.size);
+      circle(endPoint.x, endPoint.y, stroke.size);
     } else if (penTip === 'square') {
-      gfx.square(endPoint.x, endPoint.y, stroke.size);
+      square(endPoint.x, endPoint.y, stroke.size);
     } else if (penTip === 'triangle') {
       let halfSize = stroke.size / 2;
       let angle = atan2(endPoint.y - startPoint.y, endPoint.x - startPoint.x);
@@ -229,7 +217,10 @@ function drawLine(startIndex, endIndex) {
       let x3 = endPoint.x + cos(angle + (4 * PI / 3)) * halfSize;
       let y3 = endPoint.y + sin(angle + (4 * PI / 3)) * halfSize;
 
-      gfx.triangle(x1, y1, x2, y2, x3, y3);
+      triangle(x1, y1, x2, y2, x3, y3);
+    } else if (penTip === 'water-color') {
+      //TODO CHECK HERE!
+      blob(50, endPoint.x, endPoint.y);
     }
 
     // Set the shape property of the current stroke
@@ -238,6 +229,27 @@ function drawLine(startIndex, endIndex) {
     dirty = true;
   }
 }
+
+function blob(h, x1, y1) {
+  noStroke();
+  fill(h, 80, 80, 0.02);
+
+  for (let i = 0; i <= 4; i++) {
+    let rs = random(2.0) - 1.0;
+
+    beginShape();
+    for (let a = 0; a <= 360; a += 10) {
+      let r = 150 + 25 * noise(a + 4 * rs) * 2 - 1;
+      let x = r * cos(a);
+      let y = r * sin(a);
+
+      curveVertex(x1 + x, y1 - y);
+      filter(BLUR, 10);
+    }
+    endShape();
+  }
+}
+
 
 
 
@@ -249,7 +261,6 @@ function mouseReleased() {
   }
 }
 
-
 function undo() {
   if (strokes.length > 0) {
     let lastStroke = strokes.pop();
@@ -257,7 +268,6 @@ function undo() {
     redrawCanvas();
   }
 }
-
 
 function redo() {
   if (savedStrokes.length > 0) {
@@ -269,7 +279,7 @@ function redo() {
 
 function redrawCanvas() {
   gfx.clear();
-  gfx.background(backgroundColor);
+  gfx.background(255);
 
   // Draw strokes from strokes array
   for (let stroke of strokes) {
@@ -295,5 +305,3 @@ function redrawCanvas() {
 
   dirty = true;
 }
-
-
