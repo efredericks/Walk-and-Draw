@@ -16,7 +16,7 @@ let backgroundColor = "#FFFFFF"; // background color (white)
 let penTip;
 const DIM = 1000;
 //map things
-let map;
+let localMap;
 const mapboxAccessToken = 'pk.eyJ1IjoiZ29vZGxpbmEiLCJhIjoiY2xpM2F2ZGlpMGxseDNnbnRqMWl1c3A3bCJ9.WMJlwaLWmoNc-YuSv-92Ow';
 let hollandLatitude = 42.78;
 let hollandLongitude = -86.1089;
@@ -27,15 +27,15 @@ let currentPosition;
 
 function setUpMap() {
   mapboxgl.accessToken = mapboxAccessToken;
-  map = new mapboxgl.Map({
+  localMap = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/streets-v11',
     center: [hollandLongitude, hollandLatitude],
     zoom: zoomLevel
   });
 
-  map.on('load', () => {
-    map.addSource('current-location', {
+  localMap.on('load', () => {
+    localMap.addSource('current-location', {
       type: 'geojson',
       data: {
         type: 'Feature',
@@ -46,7 +46,7 @@ function setUpMap() {
       }
     });
 
-    map.addLayer({
+    localMap.addLayer({
       id: 'current-location',
       type: 'circle',
       source: 'current-location',
@@ -69,7 +69,7 @@ function setUpMap() {
 }
 
 function updateDotPosition() {
-  map.getSource('current-location').setData({
+  localMap.getSource('current-location').setData({
     type: 'Feature',
     geometry: {
       type: 'Point',
@@ -189,9 +189,9 @@ function mouseDragged() {
 }
 
 function drawLine(startIndex, endIndex) {
-  let stroke = currentStroke;
-  strokeWeight(stroke.size);
-  stroke(stroke.color);
+  let cs = currentStroke;
+  strokeWeight(cs.size);
+  stroke(cs.color);
 
   if (
     startIndex >= 0 &&
