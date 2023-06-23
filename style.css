@@ -9,37 +9,38 @@ canvas {
 }
 
 .button-container button {
-  background-color: blue;
-  color: white;
-  padding: 10px 40px;
-  border: black;
-  border-radius: 20px;
-  cursor: pointer;
+    background-color: blue;
+    color: white;
+    padding: 10px 40px;
+    border: black;
+    border-radius: 20px;
+    cursor: pointer;
 }
+
 .button-container {
- display: grid;
- grid-template-columns: repeat(1,auto);
-  grid-gap: 10px;
-  position: absolute; /* Add this property to position the container */
-  top: 4%; /* Adjust the top position as needed */
+    display: grid;
+    grid-template-columns: repeat(1, auto);
+    grid-gap: 10px;
+    position: absolute;
+    top: 4%;
 }
 
 .button-container button:hover {
-  background-color: black;
+    background-color: black;
 }
 
-.slider-container{
-
-  background-color: lightgrey;
-  color: black;
-  padding: 10px 40px;
-  border: black;
-  border-radius: 20px;
-  cursor: pointer;
+.slider-container {
+    background-color: lightgrey;
+    color: black;
+    padding: 10px 40px;
+    border: black;
+    border-radius: 20px;
+    cursor: pointer;
 }
-.slider-container{
+
+.slider-container {
     display: grid;
-    grid-template-columns: repeat(3,auto);
+    grid-template-columns: repeat(3, auto);
     grid-gap: 10px;
     position: absolute;
     top: 4%;

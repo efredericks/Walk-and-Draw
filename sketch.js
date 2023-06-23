@@ -12,7 +12,7 @@ let windowScale;
 let dirty = true;
 let colorPicker, sizeSlider, backgroundColorPicker;
 let btnSave, btnClear, btnUndo, btnRedo;
-let backgroundColor = "#FFFFFF"; // Initial background color (white)
+let backgroundColor = "#FFFFFF"; // background color (white)
 let penTip;
 const DIM = 1000;
 //map things
@@ -177,7 +177,7 @@ function mouseDragged() {
       currentStroke = {
         size: sizeSlider.value,
         color: colorPicker.value,
-        shape: penTip, // Store the shape of the brush
+        shape: penTip, //shape of the brush
         points: [],
       };
       strokes.push(currentStroke);
@@ -219,11 +219,10 @@ function drawLine(startIndex, endIndex) {
 
       triangle(x1, y1, x2, y2, x3, y3);
     } else if (penTip === 'water-color') {
-      //TODO CHECK HERE!
+      //TODO CHECK
       blob(50, endPoint.x, endPoint.y);
     }
 
-    // Set the shape property of the current stroke
     stroke.shape = penTip;
 
     dirty = true;
