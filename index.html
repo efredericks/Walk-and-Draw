@@ -30,9 +30,18 @@
     <div id="map"></div>
 
     <!-- Buttons -->
-    <div class="save-container">
-        <button id="btnSave" onclick="saveImg()">Save</button>
-        <button id="btnClear" onclick="clearImg()">Clear</button>
+    <button id = "mainButton" onclick = "toggleButtons()">
+        <img src= "Buttons/Options.png" alt = "optionsButton"/>
+    </button>
+
+        <div id="additionalButtons">
+        <button id="btnSave" onclick="saveImg()">
+            <img src= "Buttons/Save.png" alt = "savebutton"/>
+        </button>
+
+        <button id="btnClear" onclick="clearImg()">
+            <img src= "Buttons/Clear.png" alt = "clearbutton"/>
+        </button>
     </div>
 
     <div class="stroke-container">

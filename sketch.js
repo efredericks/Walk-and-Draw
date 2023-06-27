@@ -342,4 +342,9 @@ function updatePenTip(selectedPenTip) {
   penTip = selectedPenTip;
   console.log(penTip);
 }
+function toggleButtons() {
+  var additionalButtons = document.getElementById('additionalButtons');
+  additionalButtons.style.display = (additionalButtons.style.display === 'none') ? 'grid' : 'none';
+}
+
 

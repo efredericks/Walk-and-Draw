@@ -7,30 +7,36 @@ body {
 canvas {
     display: block;
 }
-
-.save-container button {
-    background-color: blue;
-    color: white;
-    padding: 10px 40px;
-    border: black;
-    border-radius: 20px;
-    cursor: pointer;
-}
-
-.save-container {
-    display: grid;
-    grid-template-columns: repeat(1, auto);
-    grid-gap: 10px;
+#mainButton{
+    background-color: gray;
     position: absolute;
-    top: 4%;
+    top:4%;
+    left: 5px;
+    border-color: black;
+
+}
+#additionalButtons {
+    display: none;
+    grid-template-columns: repeat(1,auto);
+    grid-gap:10px;
+    position: absolute;
+    top: 11%;
+    left: 5px;
     z-index: 2;
+    border-color: black;
+    border-radius: 50%;
+    
 }
 
-.save-container button:hover {
-    background-color: black;
+
+
+#additionalButtons button:hover {
+    background-color: grey;
+    box-shadow: 0 12px 16px 0 rgba(0,0,0,0.5), 0 17px 50px 0 rgba(0,0,0,0.4);
+
 }
 
-.stroke-container button{
+.stroke-container button {
     background-color: grey;
     color: white;
     padding: 10px 40px;
@@ -38,10 +44,11 @@ canvas {
     border-radius: 200px;
     cursor: pointer;
 }
-.stroke-container{
+
+.stroke-container {
     display: grid;
-    grid-template-columns: repeat(2,auto);
-    grid-gap:0px;
+    grid-template-columns: repeat(2, auto);
+    grid-gap: 0px;
     position: absolute;
     bottom: 2%;
     z-index: 2;
@@ -67,13 +74,10 @@ canvas {
     left: 10%;
 }
 
-/* CODE BELOW IS ALL TO DO WITH THE PENTIP SELECTION MENU*/ 
-/*@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
-*/
-*
+/* CODE BELOW IS ALL TO DO WITH THE PENTIP SELECTION MENU*/
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
-.pen-tip
-{
+ .pen-tip {
     width: 400px;
     height: 70px;
     background: black;
@@ -83,23 +87,23 @@ canvas {
     align-items: center;
     border-radius: 10px;
     top: 90%;
-    left:20%;
+    left: 20%;
 }
-.pen-tip ul
-{
+
+.pen-tip ul {
     display: flex;
     width: 350px;
 }
-.pen-tip ul li
-{
+
+.pen-tip ul li {
     position: relative;
     list-style: none;
     width: 70px;
     height: 70px;
     z-index: 1;
 }
-.pen-tip ul li a
-{
+
+.pen-tip ul li a {
     position: relative;
     display: flex;
     justify-content: center;
@@ -109,8 +113,8 @@ canvas {
     text-align: center;
     font-weight: 500;
 }
-.pen-tip ul li a .icon
-{
+
+.pen-tip ul li a .icon {
     position: relative;
     display: block;
     line-height: 75px;
@@ -119,12 +123,12 @@ canvas {
     transition: 0.5s;
     color: var(--clr);
 }
-.pen-tip ul li.active a .icon
-{
+
+.pen-tip ul li.active a .icon {
     transform: translateY(-32px);
 }
-.pen-tip ul li a .text
-{
+
+.pen-tip ul li a .text {
     position: absolute;
     color: var(--clr);
     font-weight: 400;
@@ -134,13 +138,13 @@ canvas {
     opacity: 0;
     transform: translateY(20px);
 }
-.pen-tip ul li.active a .text
-{
+
+.pen-tip ul li.active a .text {
     transform: translateY(10px);
     opacity: 1;
 }
-.indicator
-{
+
+.indicator {
     position: absolute;
     top: -50%;
     width: 70px;
@@ -150,8 +154,8 @@ canvas {
     border: 6px solid var(--clr);
     transition: 0.5s;
 }
-.indicator::before
-{
+
+.indicator::before {
     content: '';
     position: absolute;
     top: 50%;
@@ -162,8 +166,8 @@ canvas {
     border-top-right-radius: 20px;
     box-shadow: 1px -10px 0 0 var(--clr);
 }
-.indicator::after
-{
+
+.indicator::after {
     content: '';
     position: absolute;
     top: 50%;
@@ -174,23 +178,23 @@ canvas {
     border-top-left-radius: 20px;
     box-shadow: -1px -10px 0 0 var(--clr);
 }
-.pen-tip ul li:nth-child(1).active ~ .indicator
-{
+
+.pen-tip ul li:nth-child(1).active~.indicator {
     transform: translateX(calc(70px * 0));
 }
-.pen-tip ul li:nth-child(2).active ~ .indicator
-{
+
+.pen-tip ul li:nth-child(2).active~.indicator {
     transform: translateX(calc(70px * 1));
 }
-.pen-tip ul li:nth-child(3).active ~ .indicator
-{
+
+.pen-tip ul li:nth-child(3).active~.indicator {
     transform: translateX(calc(70px * 2));
 }
-.pen-tip ul li:nth-child(4).active ~ .indicator
-{
+
+.pen-tip ul li:nth-child(4).active~.indicator {
     transform: translateX(calc(70px * 3));
 }
-.pen-tip ul li:nth-child(5).active ~ .indicator
-{
+
+.pen-tip ul li:nth-child(5).active~.indicator {
     transform: translateX(calc(70px * 4));
 }
