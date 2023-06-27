@@ -13,9 +13,9 @@ let dirty = true;
 let colorPicker, sizeSlider, backgroundColorPicker;
 let btnSave, btnClear, btnUndo, btnRedo;
 let backgroundColor = "#FFFFFF"; // Initial background color (white)
-let penTip;
 const DIM = 1000;
 //map things
+let penTip;
 let map;
 const mapboxAccessToken = 'pk.eyJ1IjoiZ29vZGxpbmEiLCJhIjoiY2xpM2F2ZGlpMGxseDNnbnRqMWl1c3A3bCJ9.WMJlwaLWmoNc-YuSv-92Ow';
 let hollandLatitude = 42.78;
@@ -89,7 +89,7 @@ function trackCurrentLocation() {
 function setup() {
   windowScale = DIM / 1000;
   fontsize = 24 * windowScale;
-  penTip = 'circle';
+  penTip = 'Circle';
   createCanvas(windowWidth, windowHeight);
   gfx = createGraphics(DIM, DIM);
   gfx.background(255);
@@ -121,9 +121,6 @@ function setup() {
   trackCurrentLocation();
 }
 
-function changePenTip() {
-  penTip = document.getElementById('penTipSelect').value;
-}
 
 function changeBackgroundColor() {
   backgroundColor = backgroundColorPicker.value;
@@ -209,11 +206,11 @@ function drawLine(startIndex, endIndex) {
     let startPoint = stroke.points[startIndex];
     let endPoint = stroke.points[endIndex];
 
-    if (penTip === 'circle') {
+    if (penTip === 'Circle') {
       gfx.circle(endPoint.x, endPoint.y, stroke.size);
-    } else if (penTip === 'square') {
+    } else if (penTip === 'Square') {
       gfx.square(endPoint.x, endPoint.y, stroke.size);
-    } else if (penTip === 'triangle') {
+    } else if (penTip === 'Triangle') {
       let halfSize = stroke.size / 2;
       let angle = atan2(endPoint.y - startPoint.y, endPoint.x - startPoint.x);
 
@@ -225,7 +222,7 @@ function drawLine(startIndex, endIndex) {
       let y3 = endPoint.y + sin(angle + (4 * PI / 3)) * halfSize;
 
       gfx.triangle(x1, y1, x2, y2, x3, y3);
-    } else if (penTip === 'water-color'){
+    } else if (penTip === 'WaterColor'){
         blob(stroke.color,stroke.size,endPoint.x,endPoint.y);
 
     }
@@ -315,11 +312,34 @@ function redrawCanvas() {
   dirty = true;
 }
 
-const list = document.querySelectorAll('.list');
-function activeLink(){
-    list.forEach((item)=>
-    item.classList.remove('active'));
-    this.classList.add('active');
+// Get the pen tip container and active list item
+const penTipContainer = document.querySelector('.pen-tip');
+let activeListItem = penTipContainer.querySelector('.active');
+
+// Add click event listeners to the list items
+var listItems = penTipContainer.querySelectorAll('.list');
+listItems.forEach((listItem) => {
+  listItem.addEventListener('click', () => {
+    // Remove the active class from the previously active list item
+    activeListItem.classList.remove('active');
+
+    // Add the active class to the clicked list item
+    listItem.classList.add('active');
+
+    // Update the active list item
+    activeListItem = listItem;
+
+    // Get the selected pen tip
+    let selectedPenTip = listItem.querySelector('.text').textContent;
+
+    // Update the pen tip in your drawing logic or function
+    updatePenTip(selectedPenTip);
+  });
+});
+
+// Function to update the pen tip in your drawing logic
+function updatePenTip(selectedPenTip) {
+  penTip = selectedPenTip;
+  console.log(penTip);
 }
-list.forEach((item) =>
-item.addEventListener('click',activeLink));
+
