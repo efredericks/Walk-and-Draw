@@ -111,13 +111,8 @@ function setup() {
   btnRedo = document.getElementById('btnRedo');
   colorPicker = document.getElementById('colorPicker');
   sizeSlider = document.getElementById('sizeSlider');
-  //backgroundColorPicker = document.getElementById('backgroundColorPicker');
-
-  //backgroundColorPicker.value = backgroundColor; // Set initial background color picker value
-
   colorPicker.addEventListener('input', changeStroke);
   sizeSlider.addEventListener('input', changeStroke);
-  //backgroundColorPicker.addEventListener('input', changeBackgroundColor);
   btnUndo.addEventListener('click', undo);
   btnRedo.addEventListener('click', redo);
 
@@ -320,3 +315,11 @@ function redrawCanvas() {
   dirty = true;
 }
 
+const list = document.querySelectorAll('.list');
+function activeLink(){
+    list.forEach((item)=>
+    item.classList.remove('active'));
+    this.classList.add('active');
+}
+list.forEach((item) =>
+item.addEventListener('click',activeLink));
