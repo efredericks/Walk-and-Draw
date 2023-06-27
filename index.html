@@ -28,27 +28,33 @@
 
     <!-- Buttons -->
     <div class="button-container">
-        <button id="btnSave" onclick="saveImg()">Save</button>
-        <button id="btnClear" onclick="clearImg()">Clear</button>
+    <button id="btnSave" onclick="saveImg()">Save</button>
+    <button id="btnClear" onclick="clearImg()">Clear</button>
         <button id="btnUndo" onclick="undo()">Undo</button>
-        <button id="btnRedo" onclick="redo()">Redo</button>
-    </div>
+    <button id="btnRedo" onclick="redo()">Redo</button>
 
+    </div>
     <!-- Sliders -->
-    <div class="slider-container">
-        <label for="sliderSize">Pen Size:</label>
-        <input type="color" id="colorPicker" value="#000000">
-        <input type="range" id="sizeSlider" min="1" max="10" value="5">
-        <label for="aFiller"></label>  
-        <label for="penTipSelect">Pen Tip:</label>
-        <select id="penTipSelect" onchange="changePenTip()">
-            <option value="circle">Circle</option>
-            <option value="square">Square</option>
-            <option value="triangle">Triangle</option>
-            <option value="water-color">Water-Color</option>
-        </select>
-    </div>
+    <div class= "slider-container">
+    
+    <label for="sliderSize">Pen Size:</label>
+    <input type="color" id="colorPicker" value="#000000">
+    <input type="range" id="sizeSlider" min="1" max="10" value="5">
+    
+    
+    <label for="aFiller"></label>  
+   
+    <label for="penTipSelect">Pen Tip:</label>
+<select id="penTipSelect" onchange="changePenTip()">
+  <option value="circle">Circle</option>
+  <option value="square">Square</option>
+  <option value="triangle">Triangle</option>
+  <option value="water-color">water-color</option>
+</select>
 
+    
+    
+</div>
     <script src="sketch.js"></script>
 </body>
 

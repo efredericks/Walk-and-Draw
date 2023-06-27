@@ -12,11 +12,11 @@ let windowScale;
 let dirty = true;
 let colorPicker, sizeSlider, backgroundColorPicker;
 let btnSave, btnClear, btnUndo, btnRedo;
-let backgroundColor = "#FFFFFF"; // background color (white)
+let backgroundColor = "#FFFFFF"; // Initial background color (white)
 let penTip;
 const DIM = 1000;
 //map things
-let localMap;
+let map;
 const mapboxAccessToken = 'pk.eyJ1IjoiZ29vZGxpbmEiLCJhIjoiY2xpM2F2ZGlpMGxseDNnbnRqMWl1c3A3bCJ9.WMJlwaLWmoNc-YuSv-92Ow';
 let hollandLatitude = 42.78;
 let hollandLongitude = -86.1089;
@@ -27,15 +27,15 @@ let currentPosition;
 
 function setUpMap() {
   mapboxgl.accessToken = mapboxAccessToken;
-  localMap = new mapboxgl.Map({
+  map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/streets-v11',
     center: [hollandLongitude, hollandLatitude],
     zoom: zoomLevel
   });
 
-  localMap.on('load', () => {
-    localMap.addSource('current-location', {
+  map.on('load', () => {
+    map.addSource('current-location', {
       type: 'geojson',
       data: {
         type: 'Feature',
@@ -46,7 +46,7 @@ function setUpMap() {
       }
     });
 
-    localMap.addLayer({
+    map.addLayer({
       id: 'current-location',
       type: 'circle',
       source: 'current-location',
@@ -69,7 +69,7 @@ function setUpMap() {
 }
 
 function updateDotPosition() {
-  localMap.getSource('current-location').setData({
+  map.getSource('current-location').setData({
     type: 'Feature',
     geometry: {
       type: 'Point',
@@ -111,9 +111,13 @@ function setup() {
   btnRedo = document.getElementById('btnRedo');
   colorPicker = document.getElementById('colorPicker');
   sizeSlider = document.getElementById('sizeSlider');
+  //backgroundColorPicker = document.getElementById('backgroundColorPicker');
+
+  //backgroundColorPicker.value = backgroundColor; // Set initial background color picker value
 
   colorPicker.addEventListener('input', changeStroke);
   sizeSlider.addEventListener('input', changeStroke);
+  //backgroundColorPicker.addEventListener('input', changeBackgroundColor);
   btnUndo.addEventListener('click', undo);
   btnRedo.addEventListener('click', redo);
 
@@ -126,8 +130,16 @@ function changePenTip() {
   penTip = document.getElementById('penTipSelect').value;
 }
 
+function changeBackgroundColor() {
+  backgroundColor = backgroundColorPicker.value;
+  gfx.background(backgroundColor);
+  redrawCanvas();
+  dirty = true;
+}
+
 function draw() {
   if (dirty) {
+    background(backgroundColor);
     image(gfx, 0, 24);
     drawHeader();
     dirty = false;
@@ -148,7 +160,7 @@ function saveImg() {
 function clearImg() {
   dirty = true;
   gfx.clear();
-  gfx.background(255);
+  gfx.background(backgroundColor);
   strokes = [];
 }
 
@@ -177,21 +189,21 @@ function mouseDragged() {
       currentStroke = {
         size: sizeSlider.value,
         color: colorPicker.value,
-        shape: penTip, //shape of the brush
+        shape: penTip, // Store the shape of the brush
         points: [],
       };
       strokes.push(currentStroke);
     }
 
     currentStroke.points.push({ x: x, y: y });
-    drawLine(currentStroke.points[currentStroke.points.length - 2], currentStroke.points[currentStroke.points.length - 1]);
+    drawLine(currentStroke.points.length - 2, currentStroke.points.length - 1);
   }
 }
 
 function drawLine(startIndex, endIndex) {
-  let cs = currentStroke;
-  strokeWeight(cs.size);
-  stroke(cs.color);
+  let stroke = currentStroke;
+  gfx.strokeWeight(stroke.size);
+  gfx.stroke(stroke.color);
 
   if (
     startIndex >= 0 &&
@@ -203,9 +215,9 @@ function drawLine(startIndex, endIndex) {
     let endPoint = stroke.points[endIndex];
 
     if (penTip === 'circle') {
-      circle(endPoint.x, endPoint.y, stroke.size);
+      gfx.circle(endPoint.x, endPoint.y, stroke.size);
     } else if (penTip === 'square') {
-      square(endPoint.x, endPoint.y, stroke.size);
+      gfx.square(endPoint.x, endPoint.y, stroke.size);
     } else if (penTip === 'triangle') {
       let halfSize = stroke.size / 2;
       let angle = atan2(endPoint.y - startPoint.y, endPoint.x - startPoint.x);
@@ -217,38 +229,39 @@ function drawLine(startIndex, endIndex) {
       let x3 = endPoint.x + cos(angle + (4 * PI / 3)) * halfSize;
       let y3 = endPoint.y + sin(angle + (4 * PI / 3)) * halfSize;
 
-      triangle(x1, y1, x2, y2, x3, y3);
-    } else if (penTip === 'water-color') {
-      //TODO CHECK
-      blob(50, endPoint.x, endPoint.y);
+      gfx.triangle(x1, y1, x2, y2, x3, y3);
+    } else if (penTip === 'water-color'){
+        blob(stroke.color,stroke.size,endPoint.x,endPoint.y);
+
     }
 
+    // Set the shape property of the current stroke
     stroke.shape = penTip;
 
     dirty = true;
   }
 }
+function blob(hue,size, x1, y1) {
+  gfx.noStroke();
+  console.log(hue);
+  let shapeFillColor = color(hue);
+  shapeFillColor.setAlpha(5);
+  gfx.fill(shapeFillColor);
 
-function blob(h, x1, y1) {
-  noStroke();
-  fill(h, 80, 80, 0.02);
+  for (var i = 0; i <= 2; i++) {
+      var rs = random(2.0) - 1.0;
 
-  for (let i = 0; i <= 4; i++) {
-    let rs = random(2.0) - 1.0;
+      gfx.beginShape();
+      for (var a = 0; a <= 360; a += 10) {
+          var r = (size * 4) + 25 * noise(a + 9 * rs) * 2 - 1;
+          var x = r * cos(a);
+          var y = r * sin(a);
 
-    beginShape();
-    for (let a = 0; a <= 360; a += 10) {
-      let r = 150 + 25 * noise(a + 4 * rs) * 2 - 1;
-      let x = r * cos(a);
-      let y = r * sin(a);
-
-      curveVertex(x1 + x, y1 - y);
-      filter(BLUR, 10);
-    }
-    endShape();
+          gfx.curveVertex(x1 + x, y1 - y);
+      }
+      gfx.endShape();
   }
 }
-
 
 
 
@@ -260,6 +273,7 @@ function mouseReleased() {
   }
 }
 
+
 function undo() {
   if (strokes.length > 0) {
     let lastStroke = strokes.pop();
@@ -267,6 +281,7 @@ function undo() {
     redrawCanvas();
   }
 }
+
 
 function redo() {
   if (savedStrokes.length > 0) {
@@ -278,7 +293,7 @@ function redo() {
 
 function redrawCanvas() {
   gfx.clear();
-  gfx.background(255);
+  gfx.background(backgroundColor);
 
   // Draw strokes from strokes array
   for (let stroke of strokes) {
@@ -304,3 +319,4 @@ function redrawCanvas() {
 
   dirty = true;
 }
+
