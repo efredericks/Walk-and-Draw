@@ -18,16 +18,24 @@
 
         #map {
             position: absolute;
-            top: 0;
+            top: 4%;
             bottom: 0;
-            left: 50%;
-            width: 50%;
+            left: 0%;
+            width: 100%;
+            z-index: 0;
+        }
+        #canvas{
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
         }
     </style>
 </head>
 
 <body>
     <div id="map"></div>
+    <canvas id="canvas" > </canvas> 
 
     <!-- Buttons -->
     <button id = "mainButton" onclick = "toggleButtons()">

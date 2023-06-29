@@ -4,16 +4,14 @@ body {
     padding: 0;
 }
 
-canvas {
-    display: block;
-}
+
 #mainButton{
     background-color: gray;
     position: absolute;
     top:4%;
     left: 5px;
     border-color: black;
-
+    z-index: 2;
 }
 #additionalButtons {
     display: none;
@@ -25,7 +23,6 @@ canvas {
     z-index: 2;
     border-color: black;
     border-radius: 50%;
-    
 }
 
 
@@ -75,8 +72,8 @@ canvas {
 }
 
 /* CODE BELOW IS ALL TO DO WITH THE PENTIP SELECTION MENU*/
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
-
+/*@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
+*/
  .pen-tip {
     width: 400px;
     height: 70px;
@@ -88,6 +85,7 @@ canvas {
     border-radius: 10px;
     top: 90%;
     left: 20%;
+    z-index: 2;
 }
 
 .pen-tip ul {

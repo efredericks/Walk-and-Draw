@@ -10,7 +10,7 @@ let debounce = 0;
 let font, fontsize;
 let windowScale;
 let dirty = true;
-let colorPicker, sizeSlider, backgroundColorPicker;
+let colorPicker, sizeSlider;
 let btnSave, btnClear, btnUndo, btnRedo;
 let backgroundColor = "#FFFFFF"; // Initial background color (white)
 const DIM = 1000;
@@ -90,9 +90,12 @@ function setup() {
   windowScale = DIM / 1000;
   fontsize = 24 * windowScale;
   penTip = 'Circle';
-  createCanvas(windowWidth, windowHeight);
+  
+ var canvas =  createCanvas(windowWidth, windowHeight);
+ canvas.id('canvas');
+ canvas.style('z-index', '1');
   gfx = createGraphics(DIM, DIM);
-  gfx.background(255);
+  gfx.background(255,255,255,0);
 
   textFont('Arial');
   gfx.textFont('Arial');
@@ -121,17 +124,9 @@ function setup() {
   trackCurrentLocation();
 }
 
-
-function changeBackgroundColor() {
-  backgroundColor = backgroundColorPicker.value;
-  gfx.background(backgroundColor);
-  redrawCanvas();
-  dirty = true;
-}
-
 function draw() {
   if (dirty) {
-    background(backgroundColor);
+    //background();
     image(gfx, 0, 24);
     drawHeader();
     dirty = false;
@@ -151,9 +146,11 @@ function saveImg() {
 
 function clearImg() {
   dirty = true;
+  console.log("Clear");
   gfx.clear();
-  gfx.background(backgroundColor);
+  gfx.background(0,0,0,0);
   strokes = [];
+  savedStrokes = [];
 }
 
 function changeStroke() {
@@ -233,28 +230,34 @@ function drawLine(startIndex, endIndex) {
     dirty = true;
   }
 }
-function blob(hue,size, x1, y1) {
+function blob(hue, size, x1, y1) {
   gfx.noStroke();
-  console.log(hue);
-  let shapeFillColor = color(hue);
-  shapeFillColor.setAlpha(5);
-  gfx.fill(shapeFillColor);
 
+  // Holds the alpha value
   for (var i = 0; i <= 2; i++) {
-      var rs = random(2.0) - 1.0;
+    var rs = random(2.0) - 1.0;
 
-      gfx.beginShape();
-      for (var a = 0; a <= 360; a += 10) {
-          var r = (size * 4) + 25 * noise(a + 9 * rs) * 2 - 1;
-          var x = r * cos(a);
-          var y = r * sin(a);
+    gfx.beginShape();
+    for (var a = 0; a <= 360; a += 10) {
+      var r = (size * 4) + 25 * noise(a + 9 * rs) * 2 - 1;
+      var x = r * cos(a);
+      var y = r * sin(a);
 
-          gfx.curveVertex(x1 + x, y1 - y);
-      }
-      gfx.endShape();
+      // Calculate alpha value based on the range of a
+      let alphaValue = mapRange(a, 0, 360, 0, 5); // Adjust the range of alpha values as needed
+      let shapeFillColor = color(hue);
+      shapeFillColor.setAlpha(alphaValue);
+      gfx.fill(shapeFillColor);
+      gfx.curveVertex(x1 + x, y1 - y);
+    }
+    gfx.endShape();
   }
 }
 
+// Custom mapping function
+function mapRange(value, inputMin, inputMax, outputMin, outputMax) {
+  return ((value - inputMin) * (outputMax - outputMin)) / (inputMax - inputMin) + outputMin;
+}
 
 
 function mouseReleased() {
@@ -285,7 +288,7 @@ function redo() {
 
 function redrawCanvas() {
   gfx.clear();
-  gfx.background(backgroundColor);
+  gfx.background(0,0,0,0);
 
   // Draw strokes from strokes array
   for (let stroke of strokes) {
