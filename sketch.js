@@ -4,7 +4,8 @@
 let strokes = [];
 let savedStrokes = [];
 let currentStroke = null;
-let gfx;
+let gfx, stampGFX;
+let stamp;
 let debounceDelay = 5; //15;
 let debounce = 0;
 let font, fontsize;
@@ -12,6 +13,11 @@ let windowScale;
 let dirty = true;
 let colorPicker, sizeSlider;
 let btnSave, btnClear, btnUndo, btnRedo;
+
+//stamp canvas things
+let popUpCanvas, popUpCanvasElement,computedStyle ,stampCanvasWidth, stampCanvasHeight;
+let canvasRect, canvasLeft, canvasTop;
+
 let backgroundColor = "#FFFFFF"; // Initial background color (white)
 const DIM = 1000;
 //map things
@@ -20,7 +26,7 @@ let map;
 const mapboxAccessToken = 'pk.eyJ1IjoiZ29vZGxpbmEiLCJhIjoiY2xpM2F2ZGlpMGxseDNnbnRqMWl1c3A3bCJ9.WMJlwaLWmoNc-YuSv-92Ow';
 let hollandLatitude = 42.78;
 let hollandLongitude = -86.1089;
-const zoomLevel = 12;
+const zoomLevel = 9;
 
 let marker;
 let currentPosition;
@@ -104,10 +110,39 @@ function setup() {
   gfx.textAlign(LEFT, CENTER);
   textAlign(LEFT, CENTER);
 
+  //creation of the stampping canvas
+   popUpCanvasElement = document.getElementById("stampcanvas");
+ 
+   computedStyle = window.getComputedStyle(popUpCanvasElement);
+
+// Get the width and height values from the computed style
+   stampCanvasWidth = parseInt(computedStyle.getPropertyValue("width"), 10);
+   stampCanvasHeight = parseInt(computedStyle.getPropertyValue("height"), 10);
+   canvasRect = popUpCanvasElement.getBoundingClientRect();
+
+// Get the canvas position relative to the document
+   canvasLeft = canvasRect.left + window.scrollX;
+   canvasTop = canvasRect.top + window.scrollY;
+
+  console.log(canvasLeft); // Output: X-coordinate position
+  console.log(canvasTop); // Output: Y-coordinate position
+
+  console.log(stampCanvasWidth); // Output: 400
+  console.log(stampCanvasHeight); // Output: 300
+  popUpCanvas = createGraphics(stampCanvasWidth, stampCanvasHeight);
+  popUpCanvas.position(canvasLeft,canvasTop);
+  popUpCanvas.style("z-index", "2");
+  
+
+  
+
+
+
   frameRate(60);
 
   let titleWidth = drawHeader();
 
+  //buttons for all \/\/
   btnSave = document.getElementById('btnSave');
   btnClear = document.getElementById('btnClear');
   btnUndo = document.getElementById('btnUndo');
@@ -118,13 +153,24 @@ function setup() {
   sizeSlider.addEventListener('input', changeStroke);
   btnUndo.addEventListener('click', undo);
   btnRedo.addEventListener('click', redo);
+  stampSave = document.getElementById('stampSave');
+  stampClear = document.getElementById('stampClear');
 
   gfx.noStroke();
   setUpMap();
   trackCurrentLocation();
 }
+function saveStamp() {
+  // Save the drawing from the pop-up canvas as a stamp
+  stamp = popUpCanvas.get();
+
+  // Clear the pop-up canvas
+  popUpCanvas.clear();
+  clear();
+}
 
 function draw() {
+  image(popUpCanvas,canvasLeft,canvasTop);
   if (dirty) {
     //background();
     image(gfx, 0, 24);
@@ -136,7 +182,7 @@ function draw() {
     undo();
     debounce = debounceDelay;
     dirty = true;
-  }
+  }//delay in between drawing shapes
   if (debounce > 0) debounce--;
 }
 
@@ -148,9 +194,9 @@ function clearImg() {
   dirty = true;
   console.log("Clear");
   gfx.clear();
-  gfx.background(0,0,0,0);
   strokes = [];
   savedStrokes = [];
+  clear();
 }
 
 function changeStroke() {
@@ -172,6 +218,18 @@ function drawHeader() {
 function mouseDragged() {
   let x = mouseX;
   let y = mouseY - fontsize;
+  // Draw on the pop-up canvas while dragging the mouse
+  if (
+    mouseX >= canvasLeft &&
+    mouseX <= canvasLeft + stampCanvasWidth &&
+    mouseY >= canvasTop &&
+    mouseY <= canvasTop + stampCanvasHeight
+  ) {
+    console.log("we made it");
+    popUpCanvas.fill(255);
+    popUpCanvas.ellipse(mouseX, mouseY, 10,10);
+    return;
+  }
 
   if (y > fontsize) {
     if (currentStroke === null) {
@@ -188,6 +246,28 @@ function mouseDragged() {
     drawLine(currentStroke.points.length - 2, currentStroke.points.length - 1);
   }
 }
+function mouseClicked(){
+  let x = mouseX;
+  let y = mouseY - fontsize;
+  console.log("x" + mouseX);
+  console.log("y" + mouseY);
+
+  if (y > fontsize) {
+    if (currentStroke === null) {
+      currentStroke = {
+        size: sizeSlider.value,
+        color: colorPicker.value,
+        shape: penTip, // Store the shape of the brush
+        points: [],
+      };
+      strokes.push(currentStroke);
+    }
+
+    currentStroke.points.push({ x: x, y: y });
+    drawLine(currentStroke.points.length - 2, currentStroke.points.length - 1);
+  }
+}
+
 
 function drawLine(startIndex, endIndex) {
   let stroke = currentStroke;
@@ -231,13 +311,13 @@ function drawLine(startIndex, endIndex) {
   }
 }
 function blob(hue, size, x1, y1) {
-  gfx.noStroke();
+  noStroke();
 
-  // Holds the alpha value
+  // TODO: Potential fix on the GFX / TBD 
   for (var i = 0; i <= 2; i++) {
     var rs = random(2.0) - 1.0;
 
-    gfx.beginShape();
+    beginShape();
     for (var a = 0; a <= 360; a += 10) {
       var r = (size * 4) + 25 * noise(a + 9 * rs) * 2 - 1;
       var x = r * cos(a);
@@ -247,10 +327,10 @@ function blob(hue, size, x1, y1) {
       let alphaValue = mapRange(a, 0, 360, 0, 5); // Adjust the range of alpha values as needed
       let shapeFillColor = color(hue);
       shapeFillColor.setAlpha(alphaValue);
-      gfx.fill(shapeFillColor);
-      gfx.curveVertex(x1 + x, y1 - y);
+      fill(shapeFillColor);
+      curveVertex(x1 + x, y1 - y);
     }
-    gfx.endShape();
+    endShape();
   }
 }
 
