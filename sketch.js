@@ -100,7 +100,7 @@ function setup() {
  var canvas =  createCanvas(windowWidth, windowHeight);
  canvas.id('canvas');
  canvas.style('z-index', '1');
-  gfx = createGraphics(DIM, DIM);
+  gfx = createGraphics(width, height);
   gfx.background(255,255,255,0);
 
   textFont('Arial');
@@ -127,8 +127,8 @@ function setup() {
   console.log(canvasLeft); // Output: X-coordinate position
   console.log(canvasTop); // Output: Y-coordinate position
 
-  console.log(stampCanvasWidth); // Output: 400
-  console.log(stampCanvasHeight); // Output: 300
+  console.log(stampCanvasWidth); 
+  console.log(stampCanvasHeight); 
   popUpCanvas = createGraphics(stampCanvasWidth, stampCanvasHeight);
   popUpCanvas.position(canvasLeft,canvasTop);
   popUpCanvas.style("z-index", "2");
@@ -164,13 +164,14 @@ function saveStamp() {
 }
 
 function draw() {
-  //image(popUpCanvas,canvasLeft,canvasTop);
   if (dirty) {
     //background();
     image(gfx, 0, 24);
     drawHeader();
     dirty = false;
   }
+    image(popUpCanvas,canvasLeft,canvasTop);
+
 
   if (keyIsDown(CONTROL) && keyIsDown(90) && debounce === 0) {
     undo();
@@ -221,7 +222,7 @@ function mouseDragged() {
   ) {
     console.log("we made it");
     popUpCanvas.fill(255);
-    popUpCanvas.ellipse(mouseX, mouseY, 10,10);
+    popUpCanvas.ellipse(mouseX - canvasLeft, mouseY - canvasTop, 10,10);
     return;
   }
 
@@ -334,6 +335,7 @@ function eraseFun(size,x,y) {
   gfx.fill('red');
   gfx.circle(x,y,size);
   gfx.noErase();
+  clear();
 }
 
 
