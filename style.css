@@ -24,6 +24,15 @@ body {
     border-color: black;
     border-radius: 50%;
 }
+#Erase{
+    background-color: blue;
+    position: absolute;
+    width: 200px;
+    height:100px;
+    left: 200px;
+    top: 200px;
+    z-index: 2;
+}
 
 
 
@@ -75,7 +84,7 @@ body {
 /*@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
 */
  .pen-tip {
-    width: 400px;
+    width: 500px;
     height: 70px;
     background: black;
     position: absolute;
@@ -96,8 +105,8 @@ body {
 .pen-tip ul li {
     position: relative;
     list-style: none;
-    width: 70px;
-    height: 70px;
+    width: 60px;
+    height: 60px;
     z-index: 1;
 }
 
@@ -178,21 +187,25 @@ body {
 }
 
 .pen-tip ul li:nth-child(1).active~.indicator {
-    transform: translateX(calc(70px * 0));
+    transform: translateX(calc(60px * 0));
 }
 
 .pen-tip ul li:nth-child(2).active~.indicator {
-    transform: translateX(calc(70px * 1));
+    transform: translateX(calc(60px * 1));
 }
 
 .pen-tip ul li:nth-child(3).active~.indicator {
-    transform: translateX(calc(70px * 2));
+    transform: translateX(calc(60px * 2));
 }
 
 .pen-tip ul li:nth-child(4).active~.indicator {
-    transform: translateX(calc(70px * 3));
+    transform: translateX(calc(60px * 3));
 }
 
 .pen-tip ul li:nth-child(5).active~.indicator {
-    transform: translateX(calc(70px * 4));
+    transform: translateX(calc(60px * 4));
+}
+
+.pen-tip ul li:nth-child(6).active~.indicator {
+    transform: translateX(calc(60px * 5));
 }

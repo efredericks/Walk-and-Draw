@@ -13,7 +13,7 @@ let windowScale;
 let dirty = true;
 let colorPicker, sizeSlider;
 let btnSave, btnClear, btnUndo, btnRedo;
-
+let eraseEnable = false;
 //stamp canvas things
 let popUpCanvas, popUpCanvasElement,computedStyle ,stampCanvasWidth, stampCanvasHeight;
 let canvasRect, canvasLeft, canvasTop;
@@ -132,13 +132,7 @@ function setup() {
   popUpCanvas = createGraphics(stampCanvasWidth, stampCanvasHeight);
   popUpCanvas.position(canvasLeft,canvasTop);
   popUpCanvas.style("z-index", "2");
-  
-
-  
-
-
-
-  frameRate(60);
+  frameRate(120);
 
   let titleWidth = drawHeader();
 
@@ -170,7 +164,7 @@ function saveStamp() {
 }
 
 function draw() {
-  image(popUpCanvas,canvasLeft,canvasTop);
+  //image(popUpCanvas,canvasLeft,canvasTop);
   if (dirty) {
     //background();
     image(gfx, 0, 24);
@@ -299,11 +293,12 @@ function drawLine(startIndex, endIndex) {
       let y3 = endPoint.y + sin(angle + (4 * PI / 3)) * halfSize;
 
       gfx.triangle(x1, y1, x2, y2, x3, y3);
-    } else if (penTip === 'WaterColor'){
+    } else if(penTip === 'WaterColor'){
         blob(stroke.color,stroke.size,endPoint.x,endPoint.y);
-
     }
-
+    else if(penTip === 'Eraser'){
+          eraseFun(stroke.size,endPoint.x,endPoint.y);
+    }
     // Set the shape property of the current stroke
     stroke.shape = penTip;
 
@@ -333,6 +328,28 @@ function blob(hue, size, x1, y1) {
     endShape();
   }
 }
+function eraseFun(size,x,y) {
+  gfx.erase(255,255);
+  console.log("ERASEFUN")
+  gfx.fill('red');
+  gfx.circle(x,y,size);
+  gfx.noErase();
+}
+
+
+function eraseToggle() {
+  if (eraseEnable) {
+    gfx.globalCompositeOperation = 'source-over';
+    console.log('Erase disabled');
+    eraseEnable = false;
+  } else {
+    gfx.globalCompositeOperation = 'destination-out';
+    console.log('Erase enabled');
+    eraseEnable = true;
+  }
+}
+
+
 
 // Custom mapping function
 function mapRange(value, inputMin, inputMax, outputMin, outputMax) {
