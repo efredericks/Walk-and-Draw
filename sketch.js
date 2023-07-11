@@ -115,27 +115,6 @@ function setup() {
 
   //creation of the stampping canvas
   let CreateCanvases = createStampCanvases();
-   popUpCanvasElement = document.getElementById("stampcanvas1");
- 
-   computedStyle = window.getComputedStyle(popUpCanvasElement);
-
-// Get the width and height values from the computed style
-   stampCanvasWidth = parseInt(computedStyle.getPropertyValue("width"), 10);
-   stampCanvasHeight = parseInt(computedStyle.getPropertyValue("height"), 10);
-   canvasRect = popUpCanvasElement.getBoundingClientRect();
-
-// Get the canvas position relative to the document
-   canvasLeft = canvasRect.left + window.scrollX;
-   canvasTop = canvasRect.top + window.scrollY;
-
-  console.log(canvasLeft); // Output: X-coordinate position
-  console.log(canvasTop); // Output: Y-coordinate position
-
-  console.log(stampCanvasWidth); 
-  console.log(stampCanvasHeight); 
-  popUpCanvas = createGraphics(stampCanvasWidth, stampCanvasHeight);
-  popUpCanvas.position(canvasLeft,canvasTop);
-  popUpCanvas.style("z-index", "2");
   frameRate(120);
 
   let titleWidth = drawHeader();
@@ -182,13 +161,57 @@ function createStampCanvases(){
   popUpCanvas1.position(canvasLeft1,canvasTop1);
   popUpCanvas1.style("z-index", "2");
 
+  // stampCanvas middle
+    popUpCanvasElement2 = document.getElementById("stampcanvas2");
+ 
+    computedStyle2 = window.getComputedStyle(popUpCanvasElement2);
+ 
+ // Get the width and height values from the computed style
+    stampCanvasWidth2 = parseInt(computedStyle2.getPropertyValue("width"), 10);
+    stampCanvasHeight2 = parseInt(computedStyle2.getPropertyValue("height"), 10);
+    canvasRect2 = popUpCanvasElement2.getBoundingClientRect();
+ 
+ // Get the canvas position relative to the document
+    canvasLeft2 = canvasRect2.left + window.scrollX;
+    canvasTop2 = canvasRect2.top + window.scrollY;
+ 
+   console.log(canvasLeft2); // Output: X-coordinate position
+   console.log(canvasTop2); // Output: Y-coordinate position
+ 
+   console.log(stampCanvasWidth2); 
+   console.log(stampCanvasHeight2); 
+   popUpCanvas2 = createGraphics(stampCanvasWidth2, stampCanvasHeight2);
+   popUpCanvas2.position(canvasLeft2,canvasTop2);
+   popUpCanvas2.style("z-index", "2");
 
+  // stampCanvas Bottom
+  popUpCanvasElement3 = document.getElementById("stampcanvas3");
+ 
+  computedStyle3 = window.getComputedStyle(popUpCanvasElement3);
 
+// Get the width and height values from the computed style
+  stampCanvasWidth3 = parseInt(computedStyle3.getPropertyValue("width"), 10);
+  stampCanvasHeight3 = parseInt(computedStyle3.getPropertyValue("height"), 10);
+  canvasRect3 = popUpCanvasElement3.getBoundingClientRect();
+
+// Get the canvas position relative to the document
+  canvasLeft3 = canvasRect3.left + window.scrollX;
+  canvasTop3 = canvasRect3.top + window.scrollY;
+
+ console.log(canvasLeft3); // Output: X-coordinate position
+ console.log(canvasTop3); // Output: Y-coordinate position
+
+ console.log(stampCanvasWidth3); 
+ console.log(stampCanvasHeight3); 
+ popUpCanvas3 = createGraphics(stampCanvasWidth3, stampCanvasHeight3);
+ popUpCanvas3.position(canvasLeft3,canvasTop3);
+ popUpCanvas3.style("z-index", "2");
 
 }
 function saveStamp1() {
+  // POTENTIALLY SKIP THIS STEP
   // Save the drawing from the pop-up canvas as a stamp
-  stamp = popUpCanvas.get();
+  stamp1 = popUpCanvas.get();
 
   // Clear the pop-up canvas
   popUpCanvas.clear();
@@ -202,8 +225,9 @@ function draw() {
     drawHeader();
     dirty = false;
   }
-    image(popUpCanvas,canvasLeft,canvasTop);
-
+    image(popUpCanvas1,canvasLeft1,canvasTop1);
+    image(popUpCanvas2,canvasLeft2,canvasTop2);
+    image(popUpCanvas3,canvasLeft3,canvasTop3);
 
   if (keyIsDown(CONTROL) && keyIsDown(90) && debounce === 0) {
     undo();
@@ -247,16 +271,40 @@ function mouseDragged() {
   let y = mouseY - fontsize;
   // Draw on the pop-up canvas while dragging the mouse
   if (
-    mouseX >= canvasLeft &&
-    mouseX <= canvasLeft + stampCanvasWidth &&
-    mouseY >= canvasTop &&
-    mouseY <= canvasTop + stampCanvasHeight
+    mouseX >= canvasLeft1 &&
+    mouseX <= canvasLeft1 + stampCanvasWidth1 &&
+    mouseY >= canvasTop1 &&
+    mouseY <= canvasTop1 + stampCanvasHeight1
   ) {
-    console.log("we made it");
-    popUpCanvas.fill(255);
-    popUpCanvas.ellipse(mouseX - canvasLeft, mouseY - canvasTop, 10,10);
+    console.log("we made it into canvas 1");
+    popUpCanvas1.noStroke();
+    popUpCanvas1.fill('#a83c32');
+    popUpCanvas1.ellipse(mouseX - canvasLeft1, mouseY - canvasTop1, 10,10);
+    return;
+  }else if (
+    mouseX >= canvasLeft2 &&
+    mouseX <= canvasLeft2 + stampCanvasWidth2 &&
+    mouseY >= canvasTop2 &&
+    mouseY <= canvasTop2 + stampCanvasHeight2
+  ) {
+    console.log("we made it into canvas 2");
+    popUpCanvas2.noStroke();  
+    popUpCanvas2.fill('#4ca832');
+    popUpCanvas2.ellipse(mouseX - canvasLeft2, mouseY - canvasTop2, 10,10);
     return;
   }
+    else if(
+      mouseX >= canvasLeft3 &&
+      mouseX <= canvasLeft3 + stampCanvasWidth3 &&
+      mouseY >= canvasTop3 &&
+      mouseY <= canvasTop3 + stampCanvasHeight3
+    ) {
+      console.log("we made it into canvas 3");
+      popUpCanvas3.noStroke();
+      popUpCanvas3.fill('#4232a8');
+      popUpCanvas3.ellipse(mouseX - canvasLeft3, mouseY - canvasTop3, 10,10);
+      return;
+    }
 
   if (y > fontsize) {
     if (currentStroke === null) {
