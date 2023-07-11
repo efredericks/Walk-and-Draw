@@ -24,100 +24,84 @@
             width: 100%;
             z-index: 0;
         }
-        #canvas{
+
+        #canvas {
             position: absolute;
             top: 0;
             right: 0;
             z-index: 1;
         }
-        #stampcanvas1{
+
+        #stampcanvas1 {
             position: absolute;
-            border-color:black ;
+            border-color: black;
             border-style: double;
             top: 50px;
-            left: 80%;
+            right: 10px;
             z-index: 2;
             height: 150px;
             width: 150px;
-           
         }
-        #stampButtons1{
+
+        #stampcanvas2 {
             position: absolute;
-            top:20%;
-            right: 3%;
-            z-index: 2;
-        }
-        #stampcanvas2{
-            position: absolute;
-            border-color:red;
+            border-color: red;
             border-style: double;
             top: 200px;
-            left: 80%;
+            right: 10px;
             z-index: 2;
             height: 150px;
             width: 150px;
-           
+
+
         }
-        #stampButtons2{
+
+        #stampcanvas3 {
             position: absolute;
-            top:50%;
-            right: 3%;
-            z-index: 2;
-        }
-        #stampcanvas3{
-            position: absolute;
-            border-color:blue ;
+            border-color: blue;
             border-style: double;
             top: 350px;
-            left: 80%;
+            right: 10px;
             z-index: 2;
             height: 150px;
             width: 150px;
-           
+
         }
-        #stampButtons3{
+
+        #stamp-dropdown {
+            z-index: 3;
             position: absolute;
-            top:70%;
-            right: 3%;
-            z-index: 2;
+            top:510px ;
+            right: 30px;
         }
-        
     </style>
 </head>
 
 <body>
     <div id="map"></div>
-    <canvas id="canvas" > </canvas> 
+    <canvas id="canvas"> </canvas>
     <canvas id="stampcanvas1"></canvas>
     <canvas id="stampcanvas2"></canvas>
     <canvas id="stampcanvas3"></canvas>
 
-    <div id="stampButtons1">
-        <button id="stampSave" onclick="saveStamp()">
-        Save
-        </button>
-        <button id="stampClear" onclick=" ">
-            Clear
-        </button>
 
-    </div> 
-  
+
 
     <!-- Buttons -->
-    <button id = "mainButton" onclick = "toggleButtons()">
-        <img src= "Buttons/Options.png" alt = "optionsButton"/>
+    <button id="mainButton" onclick="toggleButtons()">
+        <img src="Buttons/Options.png" alt="optionsButton" />
     </button>
 
-        <div id="additionalButtons">
+    <div id="additionalButtons">
         <button id="btnSave" onclick="saveImg()">
-            <img src= "Buttons/Save.png" alt = "savebutton"/>
+            <img src="Buttons/Save.png" alt="savebutton" />
         </button>
 
         <button id="btnClear" onclick="clearImg()">
-            <img src= "Buttons/Clear.png" alt = "clearbutton"/>
+            <img src="Buttons/Clear.png" alt="clearbutton" />
         </button>
     </div>
-
+    <!--
     <div class="stroke-container">
         <button id="btnUndo" onclick="undo()">
             <img src="Buttons/undo.png" alt="undoButton" />
@@ -125,6 +109,17 @@
         <button id="btnRedo" onclick="redo()">
             <img src="Buttons/redo.png" alt="redoButton" />
         </button>
+--->
+
+
+    <select id="stamp-dropdown" id="stamps">
+        <option value="Default">Choose a Stamp</option>
+        <option value="stamp1">Stamp 1</option>
+        <option value="stamp2">Stamp 2</option>
+        <option value="stamp3">Stamp 3</option>
+    </select>
+
+
 
     </div>
     <!-- Sliders -->
@@ -132,7 +127,7 @@
 
         <label for="sliderSize">Pen Size:</label>
         <input type="color" id="colorPicker" value="#000000">
-        <input type="range" id="sizeSlider" min="1" max="10" value="5">
+        <input type="range" id="sizeSlider" min="1" max="20" value="5">
     </div>
     <div class="pen-tip">
         <ul>
@@ -184,7 +179,7 @@
                     <span class="text">Eraser</span>
                 </a>
             </li>
-            
+
             <div class="indicator"></div>
         </ul>
     </div>

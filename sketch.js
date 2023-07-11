@@ -5,7 +5,6 @@ let strokes = [];
 let savedStrokes = [];
 let currentStroke = null;
 let gfx, stampGFX;
-let stamp;
 let debounceDelay = 5; //15;
 let debounce = 0;
 let font, fontsize;
@@ -15,12 +14,14 @@ let colorPicker, sizeSlider;
 let btnSave, btnClear, btnUndo, btnRedo;
 let eraseEnable = false;
 //stamp canvas things
-let popUpCanvas1, popUpCanvasElement1,computedStyle1 ,stampCanvasWidth1, stampCanvasHeight1;
-let popUpCanvas2, popUpCanvasElement2,computedStyle2 ,stampCanvasWidth2, stampCanvasHeight2;
-let popUpCanvas3, popUpCanvasElement3,computedStyle3 ,stampCanvasWidth3, stampCanvasHeight3;
+let popUpCanvas1, popUpCanvasElement1, computedStyle1, stampCanvasWidth1, stampCanvasHeight1;
+let popUpCanvas2, popUpCanvasElement2, computedStyle2, stampCanvasWidth2, stampCanvasHeight2;
+let popUpCanvas3, popUpCanvasElement3, computedStyle3, stampCanvasWidth3, stampCanvasHeight3;
 let canvasRect1, canvasLeft1, canvasTop1;
 let canvasRect2, canvasLeft2, canvasTop2;
 let canvasRect3, canvasLeft3, canvasTop3;
+let selectedStamp;
+let stamp = 'stamp1';
 let backgroundColor = "#FFFFFF"; // Initial background color (white)
 const DIM = 1000;
 //map things
@@ -99,12 +100,12 @@ function setup() {
   windowScale = DIM / 1000;
   fontsize = 24 * windowScale;
   penTip = 'Circle';
-  
- var canvas =  createCanvas(windowWidth, windowHeight);
- canvas.id('canvas');
- canvas.style('z-index', '1');
+
+  var canvas = createCanvas(windowWidth, windowHeight);
+  canvas.id('canvas');
+  canvas.style('z-index', '1');
   gfx = createGraphics(width, height);
-  gfx.background(255,255,255,0);
+  gfx.background(255, 255, 255, 0);
 
   textFont('Arial');
   gfx.textFont('Arial');
@@ -122,90 +123,90 @@ function setup() {
   //buttons for all \/\/
   btnSave = document.getElementById('btnSave');
   btnClear = document.getElementById('btnClear');
-  btnUndo = document.getElementById('btnUndo');
-  btnRedo = document.getElementById('btnRedo');
+  // btnUndo = document.getElementById('btnUndo');
+  // btnRedo = document.getElementById('btnRedo');
   colorPicker = document.getElementById('colorPicker');
   sizeSlider = document.getElementById('sizeSlider');
   colorPicker.addEventListener('input', changeStroke);
   sizeSlider.addEventListener('input', changeStroke);
-  btnUndo.addEventListener('click', undo);
-  btnRedo.addEventListener('click', redo);
-  stampSave = document.getElementById('stampSave');
-  stampClear = document.getElementById('stampClear');
+  // btnUndo.addEventListener('click', undo);
+  //btnRedo.addEventListener('click', redo);
+  let stampDropDown = document.getElementById('stamp-dropdown');
+
 
   gfx.noStroke();
   setUpMap();
   trackCurrentLocation();
 }
-function createStampCanvases(){
+function createStampCanvases() {
   //stampcanvas top
   popUpCanvasElement1 = document.getElementById("stampcanvas1");
- 
-   computedStyle1 = window.getComputedStyle(popUpCanvasElement1);
 
-// Get the width and height values from the computed style
-   stampCanvasWidth1 = parseInt(computedStyle1.getPropertyValue("width"), 10);
-   stampCanvasHeight1 = parseInt(computedStyle1.getPropertyValue("height"), 10);
-   canvasRect1 = popUpCanvasElement1.getBoundingClientRect();
+  computedStyle1 = window.getComputedStyle(popUpCanvasElement1);
 
-// Get the canvas position relative to the document
-   canvasLeft1 = canvasRect1.left + window.scrollX;
-   canvasTop1 = canvasRect1.top + window.scrollY;
+  // Get the width and height values from the computed style
+  stampCanvasWidth1 = parseInt(computedStyle1.getPropertyValue("width"), 10);
+  stampCanvasHeight1 = parseInt(computedStyle1.getPropertyValue("height"), 10);
+  canvasRect1 = popUpCanvasElement1.getBoundingClientRect();
+
+  // Get the canvas position relative to the document
+  canvasLeft1 = canvasRect1.left + window.scrollX;
+  canvasTop1 = canvasRect1.top + window.scrollY;
 
   console.log(canvasLeft1); // Output: X-coordinate position
   console.log(canvasTop1); // Output: Y-coordinate position
 
-  console.log(stampCanvasWidth1); 
-  console.log(stampCanvasHeight1); 
+  console.log(stampCanvasWidth1);
+  console.log(stampCanvasHeight1);
   popUpCanvas1 = createGraphics(stampCanvasWidth1, stampCanvasHeight1);
-  popUpCanvas1.position(canvasLeft1,canvasTop1);
+  popUpCanvas1.position(canvasLeft1, canvasTop1);
   popUpCanvas1.style("z-index", "2");
 
   // stampCanvas middle
-    popUpCanvasElement2 = document.getElementById("stampcanvas2");
- 
-    computedStyle2 = window.getComputedStyle(popUpCanvasElement2);
- 
- // Get the width and height values from the computed style
-    stampCanvasWidth2 = parseInt(computedStyle2.getPropertyValue("width"), 10);
-    stampCanvasHeight2 = parseInt(computedStyle2.getPropertyValue("height"), 10);
-    canvasRect2 = popUpCanvasElement2.getBoundingClientRect();
- 
- // Get the canvas position relative to the document
-    canvasLeft2 = canvasRect2.left + window.scrollX;
-    canvasTop2 = canvasRect2.top + window.scrollY;
- 
-   console.log(canvasLeft2); // Output: X-coordinate position
-   console.log(canvasTop2); // Output: Y-coordinate position
- 
-   console.log(stampCanvasWidth2); 
-   console.log(stampCanvasHeight2); 
-   popUpCanvas2 = createGraphics(stampCanvasWidth2, stampCanvasHeight2);
-   popUpCanvas2.position(canvasLeft2,canvasTop2);
-   popUpCanvas2.style("z-index", "2");
+  popUpCanvasElement2 = document.getElementById("stampcanvas2");
+
+  computedStyle2 = window.getComputedStyle(popUpCanvasElement2);
+
+  // Get the width and height values from the computed style
+  stampCanvasWidth2 = parseInt(computedStyle2.getPropertyValue("width"), 10);
+  stampCanvasHeight2 = parseInt(computedStyle2.getPropertyValue("height"), 10);
+  canvasRect2 = popUpCanvasElement2.getBoundingClientRect();
+
+  // Get the canvas position relative to the document
+  canvasLeft2 = canvasRect2.left + window.scrollX;
+  canvasTop2 = canvasRect2.top + window.scrollY;
+
+  console.log(canvasLeft2); // Output: X-coordinate position
+  console.log(canvasTop2); // Output: Y-coordinate position
+
+  console.log(stampCanvasWidth2);
+  console.log(stampCanvasHeight2);
+  popUpCanvas2 = createGraphics(stampCanvasWidth2, stampCanvasHeight2);
+  popUpCanvas2.position(canvasLeft2, canvasTop2);
+  popUpCanvas2.style("z-index", "2");
 
   // stampCanvas Bottom
   popUpCanvasElement3 = document.getElementById("stampcanvas3");
- 
+
   computedStyle3 = window.getComputedStyle(popUpCanvasElement3);
 
-// Get the width and height values from the computed style
+  // Get the width and height values from the computed style
   stampCanvasWidth3 = parseInt(computedStyle3.getPropertyValue("width"), 10);
   stampCanvasHeight3 = parseInt(computedStyle3.getPropertyValue("height"), 10);
   canvasRect3 = popUpCanvasElement3.getBoundingClientRect();
 
-// Get the canvas position relative to the document
+  // Get the canvas position relative to the document
   canvasLeft3 = canvasRect3.left + window.scrollX;
   canvasTop3 = canvasRect3.top + window.scrollY;
 
- console.log(canvasLeft3); // Output: X-coordinate position
- console.log(canvasTop3); // Output: Y-coordinate position
+  console.log(canvasLeft3); // Output: X-coordinate position
+  console.log(canvasTop3); // Output: Y-coordinate position
 
- console.log(stampCanvasWidth3); 
- console.log(stampCanvasHeight3); 
- popUpCanvas3 = createGraphics(stampCanvasWidth3, stampCanvasHeight3);
- popUpCanvas3.position(canvasLeft3,canvasTop3);
- popUpCanvas3.style("z-index", "2");
+  console.log(stampCanvasWidth3);
+  console.log(stampCanvasHeight3);
+  popUpCanvas3 = createGraphics(stampCanvasWidth3, stampCanvasHeight3);
+  popUpCanvas3.position(canvasLeft3, canvasTop3);
+  popUpCanvas3.style("z-index", "2");
 
 }
 function saveStamp1() {
@@ -225,9 +226,9 @@ function draw() {
     drawHeader();
     dirty = false;
   }
-    image(popUpCanvas1,canvasLeft1,canvasTop1);
-    image(popUpCanvas2,canvasLeft2,canvasTop2);
-    image(popUpCanvas3,canvasLeft3,canvasTop3);
+  image(popUpCanvas1, canvasLeft1, canvasTop1);
+  image(popUpCanvas2, canvasLeft2, canvasTop2);
+  image(popUpCanvas3, canvasLeft3, canvasTop3);
 
   if (keyIsDown(CONTROL) && keyIsDown(90) && debounce === 0) {
     undo();
@@ -239,6 +240,7 @@ function draw() {
 
 function saveImg() {
   gfx.save('image.png');
+  popUpCanvas1.save('canvas1image')
 }
 
 function clearImg() {
@@ -277,34 +279,65 @@ function mouseDragged() {
     mouseY <= canvasTop1 + stampCanvasHeight1
   ) {
     console.log("we made it into canvas 1");
+    if (currentStroke === null) {
+      currentStroke = {
+        size: sizeSlider.value,
+        color: colorPicker.value,
+        shape: penTip, // Store the shape of the brush
+        points: [],
+      };
+      strokes.push(currentStroke);
+    }
+    let stroke = currentStroke;
     popUpCanvas1.noStroke();
-    popUpCanvas1.fill(245,81,66);
-    popUpCanvas1.ellipse(mouseX - canvasLeft1, mouseY - canvasTop1, 10,10);
+    popUpCanvas1.fill(stroke.color);
+    popUpCanvas1.circle(mouseX - canvasLeft1, mouseY - canvasTop1, stroke.size);
+
     return;
-  }else if (
+  } else if (
     mouseX >= canvasLeft2 &&
     mouseX <= canvasLeft2 + stampCanvasWidth2 &&
     mouseY >= canvasTop2 &&
     mouseY <= canvasTop2 + stampCanvasHeight2
   ) {
     console.log("we made it into canvas 2");
-    popUpCanvas2.noStroke();  
-    popUpCanvas2.fill(66, 245, 75);
-    popUpCanvas2.ellipse(mouseX - canvasLeft2, mouseY - canvasTop2, 10,10);
+    if (currentStroke === null) {
+      currentStroke = {
+        size: sizeSlider.value,
+        color: colorPicker.value,
+        shape: penTip, // Store the shape of the brush
+        points: [],
+      };
+      strokes.push(currentStroke);
+    }
+    let stroke = currentStroke;
+    popUpCanvas2.noStroke();
+    popUpCanvas2.fill(stroke.color);
+    popUpCanvas2.circle(mouseX - canvasLeft2, mouseY - canvasTop2, stroke.size);
     return;
   }
-    else if(
-      mouseX >= canvasLeft3 &&
-      mouseX <= canvasLeft3 + stampCanvasWidth3 &&
-      mouseY >= canvasTop3 &&
-      mouseY <= canvasTop3 + stampCanvasHeight3
-    ) {
-      console.log("we made it into canvas 3");
-      popUpCanvas3.noStroke();
-      popUpCanvas3.fill(66, 81, 245);
-      popUpCanvas3.ellipse(mouseX - canvasLeft3, mouseY - canvasTop3, 10,10);
-      return;
+  else if (
+    mouseX >= canvasLeft3 &&
+    mouseX <= canvasLeft3 + stampCanvasWidth3 &&
+    mouseY >= canvasTop3 &&
+    mouseY <= canvasTop3 + stampCanvasHeight3
+  ) {
+    console.log("we made it into canvas 3");
+    if (currentStroke === null) {
+      currentStroke = {
+        size: sizeSlider.value,
+        color: colorPicker.value,
+        shape: penTip, // Store the shape of the brush
+        points: [],
+      };
+      strokes.push(currentStroke);
     }
+    let stroke = currentStroke;
+    popUpCanvas3.noStroke();
+    popUpCanvas3.fill(stroke.color);
+    popUpCanvas3.circle(mouseX - canvasLeft3, mouseY - canvasTop3, stroke.size);
+    return;
+  }
 
   if (y > fontsize) {
     if (currentStroke === null) {
@@ -317,15 +350,37 @@ function mouseDragged() {
       strokes.push(currentStroke);
     }
 
+
     currentStroke.points.push({ x: x, y: y });
     drawLine(currentStroke.points.length - 2, currentStroke.points.length - 1);
   }
 }
-function mouseClicked(){
+function mouseClicked() {
   let x = mouseX;
   let y = mouseY - fontsize;
   console.log("x" + mouseX);
   console.log("y" + mouseY);
+
+  if (penTip === 'Stamp') {
+    console.log(selectedStamp);
+
+    if (selectedStamp === 'stamp1') {
+      stamp = popUpCanvas1.get();
+      gfx.image(stamp, mouseX - stamp.width / 2, mouseY - stamp.height / 2);
+      dirty = true;
+      console.log("try harder");
+    } else if (selectedStamp === 'stamp2') {
+      stamp = popUpCanvas2.get();
+      gfx.image(stamp, mouseX - stamp.width / 2, mouseY - stamp.height / 2);
+      dirty = true;
+      console.log("try harder2");
+    } else if (selectedStamp === 'stamp3') {
+      stamp = popUpCanvas3.get();
+      gfx.image(stamp, mouseX - stamp.width / 2, mouseY - stamp.height / 2);
+      dirty = true;
+      console.log("try harder3");
+    }
+  }
 
   if (y > fontsize) {
     if (currentStroke === null) {
@@ -374,11 +429,11 @@ function drawLine(startIndex, endIndex) {
       let y3 = endPoint.y + sin(angle + (4 * PI / 3)) * halfSize;
 
       gfx.triangle(x1, y1, x2, y2, x3, y3);
-    } else if(penTip === 'WaterColor'){
-        blob(stroke.color,stroke.size,endPoint.x,endPoint.y);
+    } else if (penTip === 'WaterColor') {
+      blob(stroke.color, stroke.size, endPoint.x, endPoint.y);
     }
-    else if(penTip === 'Eraser'){
-          eraseFun(stroke.size,endPoint.x,endPoint.y);
+    else if (penTip === 'Eraser') {
+      eraseFun(stroke.size, endPoint.x, endPoint.y);
     }
     // Set the shape property of the current stroke
     stroke.shape = penTip;
@@ -409,11 +464,11 @@ function blob(hue, size, x1, y1) {
     endShape();
   }
 }
-function eraseFun(size,x,y) {
-  gfx.erase(255,255);
+function eraseFun(size, x, y) {
+  gfx.erase(255, 255);
   console.log("ERASEFUN")
   gfx.fill('red');
-  gfx.circle(x,y,size);
+  gfx.circle(x, y, size);
   gfx.noErase();
   clear();
 }
@@ -453,7 +508,7 @@ function redo() {
 
 function redrawCanvas() {
   gfx.clear();
-  gfx.background(0,0,0,0);
+  gfx.background(0, 0, 0, 0);
 
   // Draw strokes from strokes array
   for (let stroke of strokes) {
@@ -479,6 +534,11 @@ function redrawCanvas() {
 
   dirty = true;
 }
+function changeStamp(temp) {
+  selectedStamp = temp;
+  console.log(selectedStamp);
+}
+
 
 // Get the pen tip container and active list item
 const penTipContainer = document.querySelector('.pen-tip');
@@ -514,5 +574,13 @@ function toggleButtons() {
   var additionalButtons = document.getElementById('additionalButtons');
   additionalButtons.style.display = (additionalButtons.style.display === 'none') ? 'grid' : 'none';
 }
+
+var stampDropDown = document.getElementById('stamp-dropdown');
+stampDropDown.addEventListener("change", function () {
+  let changedStamp = stampDropDown.options[stampDropDown.selectedIndex].value;
+  console.log("Selected option: " + changedStamp);
+  changeStamp(changedStamp);
+});
+
 
 
