@@ -15,9 +15,12 @@ let colorPicker, sizeSlider;
 let btnSave, btnClear, btnUndo, btnRedo;
 let eraseEnable = false;
 //stamp canvas things
-let popUpCanvas, popUpCanvasElement,computedStyle ,stampCanvasWidth, stampCanvasHeight;
-let canvasRect, canvasLeft, canvasTop;
-
+let popUpCanvas1, popUpCanvasElement1,computedStyle1 ,stampCanvasWidth1, stampCanvasHeight1;
+let popUpCanvas2, popUpCanvasElement2,computedStyle2 ,stampCanvasWidth2, stampCanvasHeight2;
+let popUpCanvas3, popUpCanvasElement3,computedStyle3 ,stampCanvasWidth3, stampCanvasHeight3;
+let canvasRect1, canvasLeft1, canvasTop1;
+let canvasRect2, canvasLeft2, canvasTop2;
+let canvasRect3, canvasLeft3, canvasTop3;
 let backgroundColor = "#FFFFFF"; // Initial background color (white)
 const DIM = 1000;
 //map things
@@ -26,7 +29,7 @@ let map;
 const mapboxAccessToken = 'pk.eyJ1IjoiZ29vZGxpbmEiLCJhIjoiY2xpM2F2ZGlpMGxseDNnbnRqMWl1c3A3bCJ9.WMJlwaLWmoNc-YuSv-92Ow';
 let hollandLatitude = 42.78;
 let hollandLongitude = -86.1089;
-const zoomLevel = 9;
+const zoomLevel = 5;
 
 let marker;
 let currentPosition;
@@ -111,7 +114,8 @@ function setup() {
   textAlign(LEFT, CENTER);
 
   //creation of the stampping canvas
-   popUpCanvasElement = document.getElementById("stampcanvas");
+  let CreateCanvases = createStampCanvases();
+   popUpCanvasElement = document.getElementById("stampcanvas1");
  
    computedStyle = window.getComputedStyle(popUpCanvasElement);
 
@@ -154,7 +158,35 @@ function setup() {
   setUpMap();
   trackCurrentLocation();
 }
-function saveStamp() {
+function createStampCanvases(){
+  //stampcanvas top
+  popUpCanvasElement1 = document.getElementById("stampcanvas1");
+ 
+   computedStyle1 = window.getComputedStyle(popUpCanvasElement1);
+
+// Get the width and height values from the computed style
+   stampCanvasWidth1 = parseInt(computedStyle1.getPropertyValue("width"), 10);
+   stampCanvasHeight1 = parseInt(computedStyle1.getPropertyValue("height"), 10);
+   canvasRect1 = popUpCanvasElement1.getBoundingClientRect();
+
+// Get the canvas position relative to the document
+   canvasLeft1 = canvasRect1.left + window.scrollX;
+   canvasTop1 = canvasRect1.top + window.scrollY;
+
+  console.log(canvasLeft1); // Output: X-coordinate position
+  console.log(canvasTop1); // Output: Y-coordinate position
+
+  console.log(stampCanvasWidth1); 
+  console.log(stampCanvasHeight1); 
+  popUpCanvas1 = createGraphics(stampCanvasWidth1, stampCanvasHeight1);
+  popUpCanvas1.position(canvasLeft1,canvasTop1);
+  popUpCanvas1.style("z-index", "2");
+
+
+
+
+}
+function saveStamp1() {
   // Save the drawing from the pop-up canvas as a stamp
   stamp = popUpCanvas.get();
 
@@ -337,20 +369,6 @@ function eraseFun(size,x,y) {
   gfx.noErase();
   clear();
 }
-
-
-function eraseToggle() {
-  if (eraseEnable) {
-    gfx.globalCompositeOperation = 'source-over';
-    console.log('Erase disabled');
-    eraseEnable = false;
-  } else {
-    gfx.globalCompositeOperation = 'destination-out';
-    console.log('Erase enabled');
-    eraseEnable = true;
-  }
-}
-
 
 
 // Custom mapping function
