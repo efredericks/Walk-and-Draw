@@ -278,7 +278,7 @@ function mouseDragged() {
   ) {
     console.log("we made it into canvas 1");
     popUpCanvas1.noStroke();
-    popUpCanvas1.fill('#a83c32');
+    popUpCanvas1.fill(245,81,66);
     popUpCanvas1.ellipse(mouseX - canvasLeft1, mouseY - canvasTop1, 10,10);
     return;
   }else if (
@@ -289,7 +289,7 @@ function mouseDragged() {
   ) {
     console.log("we made it into canvas 2");
     popUpCanvas2.noStroke();  
-    popUpCanvas2.fill('#4ca832');
+    popUpCanvas2.fill(66, 245, 75);
     popUpCanvas2.ellipse(mouseX - canvasLeft2, mouseY - canvasTop2, 10,10);
     return;
   }
@@ -301,7 +301,7 @@ function mouseDragged() {
     ) {
       console.log("we made it into canvas 3");
       popUpCanvas3.noStroke();
-      popUpCanvas3.fill('#4232a8');
+      popUpCanvas3.fill(66, 81, 245);
       popUpCanvas3.ellipse(mouseX - canvasLeft3, mouseY - canvasTop3, 10,10);
       return;
     }
