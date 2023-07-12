@@ -219,7 +219,7 @@ function draw() {
   if (dirty) {
     //background();
     image(gfx, 0, 24);
-    drawHeader();
+    //drawHeader();
     dirty = false;
   }
   image(popUpCanvas1, canvasLeft1, canvasTop1);
