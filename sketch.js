@@ -5,7 +5,7 @@ let strokes = [];
 let savedStrokes = [];
 let currentStroke = null;
 let gfx, stampGFX;
-let debounceDelay = 5; //15;
+let debounceDelay = 0; //15;
 let debounce = 0;
 let font, fontsize;
 let windowScale;
@@ -26,7 +26,7 @@ let backgroundColor = "#FFFFFF"; // Initial background color (white)
 const DIM = 1000;
 //map things
 let penTip;
-let map;
+let map1;
 const mapboxAccessToken = 'pk.eyJ1IjoiZ29vZGxpbmEiLCJhIjoiY2xpM2F2ZGlpMGxseDNnbnRqMWl1c3A3bCJ9.WMJlwaLWmoNc-YuSv-92Ow';
 let hollandLatitude = 42.78;
 let hollandLongitude = -86.1089;
@@ -36,21 +36,18 @@ let marker;
 let currentPosition;
 var img;
 
-function preload(){
-
-}
 
 function setUpMap() {
   mapboxgl.accessToken = mapboxAccessToken;
-  map = new mapboxgl.Map({
+  map1 = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/streets-v11',
     center: [hollandLongitude, hollandLatitude],
     zoom: zoomLevel
   });
 
-  map.on('load', () => {
-    map.addSource('current-location', {
+  map1.on('load', () => {
+    map1.addSource('current-location', {
       type: 'geojson',
       data: {
         type: 'Feature',
@@ -61,7 +58,7 @@ function setUpMap() {
       }
     });
 
-    map.addLayer({
+    map1.addLayer({
       id: 'current-location',
       type: 'circle',
       source: 'current-location',
@@ -84,7 +81,7 @@ function setUpMap() {
 }
 
 function updateDotPosition() {
-  map.getSource('current-location').setData({
+  map1.getSource('current-location').setData({
     type: 'Feature',
     geometry: {
       type: 'Point',
@@ -578,6 +575,5 @@ stampDropDown.addEventListener("change", function () {
   console.log("Selected option: " + changedStamp);
   changeStamp(changedStamp);
 });
-
 
 
