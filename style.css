@@ -8,7 +8,7 @@ body {
 #mainButton {
     background-color: gray;
     position: absolute;
-    top: 70px;
+    top:7%;
     left: 5px;
     border-color: black;
     z-index: 2;
@@ -67,7 +67,7 @@ body {
     grid-template-columns: repeat(3, auto);
     grid-gap: 10px;
     position: absolute;
-    top: 70px;
+    top: 7%;
     left: 80px;
 }
 
@@ -75,7 +75,7 @@ body {
 /*@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
 */
 .pen-tip {
-    width: 500px;
+    width: 450px;
     height: 70px;
     background: black;
     position: absolute;
@@ -90,7 +90,7 @@ body {
 
 .pen-tip ul {
     display: flex;
-    width: 350px;
+    width: 450px;
 }
 
 .pen-tip ul li {
