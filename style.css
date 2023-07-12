@@ -75,15 +75,15 @@ body {
 /*@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
 */
 .pen-tip {
-    width: 500px;
+    width: 400px;
     height: 70px;
-    background: black;
+    background: grey;
     position: absolute;
     display: flex;
     justify-content: center;
     align-items: center;
     border-radius: 10px;
-    top: 80%;
+    top: 85%;
     left: 25%;
     z-index: 2;
 }
@@ -147,7 +147,7 @@ body {
     top: -50%;
     width: 70px;
     height: 70px;
-    background: #3b3b3b;
+    background: white;
     border-radius: 50%;
     border: 6px solid var(--clr);
     transition: 0.5s;
@@ -178,25 +178,25 @@ body {
 }
 
 .pen-tip ul li:nth-child(1).active~.indicator {
-    transform: translateX(calc(60px * 0));
+    transform: translateX(calc(-5px));
 }
 
 .pen-tip ul li:nth-child(2).active~.indicator {
-    transform: translateX(calc(60px * 1));
+    transform: translateX(calc(53px * 1));
 }
 
 .pen-tip ul li:nth-child(3).active~.indicator {
-    transform: translateX(calc(60px * 2));
+    transform: translateX(calc(55px * 2));
 }
 
 .pen-tip ul li:nth-child(4).active~.indicator {
-    transform: translateX(calc(60px * 3));
+    transform: translateX(calc(56.5px * 3));
 }
 
 .pen-tip ul li:nth-child(5).active~.indicator {
-    transform: translateX(calc(60px * 4));
+    transform: translateX(calc(56.5px * 4));
 }
 
 .pen-tip ul li:nth-child(6).active~.indicator {
-    transform: translateX(calc(60px * 5));
+    transform: translateX(calc(57px * 5));
 }
