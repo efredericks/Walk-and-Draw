@@ -34,6 +34,11 @@ const zoomLevel = 5;
 
 let marker;
 let currentPosition;
+var img;
+
+function preload(){
+
+}
 
 function setUpMap() {
   mapboxgl.accessToken = mapboxAccessToken;
@@ -118,7 +123,7 @@ function setup() {
   let CreateCanvases = createStampCanvases();
   frameRate(120);
 
-  let titleWidth = drawHeader();
+  //let titleWidth = drawHeader();
 
   //buttons for all \/\/
   btnSave = document.getElementById('btnSave');
@@ -209,15 +214,6 @@ function createStampCanvases() {
   popUpCanvas3.style("z-index", "2");
 
 }
-function saveStamp1() {
-  // POTENTIALLY SKIP THIS STEP
-  // Save the drawing from the pop-up canvas as a stamp
-  stamp1 = popUpCanvas.get();
-
-  // Clear the pop-up canvas
-  popUpCanvas.clear();
-  clear();
-}
 
 function draw() {
   if (dirty) {
@@ -239,7 +235,8 @@ function draw() {
 }
 
 function saveImg() {
-  gfx.save('image.png');
+  var gfx = document.getElementById('canvas')
+  .save('image.png');
   popUpCanvas1.save('canvas1image')
 }
 
@@ -259,14 +256,14 @@ function changeStroke() {
     dirty = true;
   }
 }
-
+/*
 function drawHeader() {
   let hdr = 'GVSU Walk-and-Draw';
   text(hdr, 3, fontsize / 2);
   line(0, fontsize, width, fontsize);
 
   return textWidth(hdr) + 3;
-}
+}**/
 
 function mouseDragged() {
   let x = mouseX;
@@ -368,17 +365,17 @@ function mouseClicked() {
       stamp = popUpCanvas1.get();
       gfx.image(stamp, mouseX - stamp.width / 2, mouseY - stamp.height / 2);
       dirty = true;
-      console.log("try harder");
+      //console.log("try harder");
     } else if (selectedStamp === 'stamp2') {
       stamp = popUpCanvas2.get();
       gfx.image(stamp, mouseX - stamp.width / 2, mouseY - stamp.height / 2);
       dirty = true;
-      console.log("try harder2");
+      //console.log("try harder2");
     } else if (selectedStamp === 'stamp3') {
       stamp = popUpCanvas3.get();
       gfx.image(stamp, mouseX - stamp.width / 2, mouseY - stamp.height / 2);
       dirty = true;
-      console.log("try harder3");
+      //console.log("try harder3");
     }
   }
 

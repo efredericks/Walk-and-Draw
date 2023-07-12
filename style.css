@@ -8,7 +8,7 @@ body {
 #mainButton {
     background-color: gray;
     position: absolute;
-    top: 4%;
+    top: 70px;
     left: 5px;
     border-color: black;
     z-index: 2;
@@ -67,8 +67,8 @@ body {
     grid-template-columns: repeat(3, auto);
     grid-gap: 10px;
     position: absolute;
-    top: 4%;
-    left: 10%;
+    top: 70px;
+    left: 80px;
 }
 
 /* CODE BELOW IS ALL TO DO WITH THE PENTIP SELECTION MENU*/
@@ -83,7 +83,7 @@ body {
     justify-content: center;
     align-items: center;
     border-radius: 10px;
-    top: 90%;
+    top: 80%;
     left: 25%;
     z-index: 2;
 }
