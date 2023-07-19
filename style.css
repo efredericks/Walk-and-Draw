@@ -5,21 +5,47 @@ body {
 }
 
 
-#mainButton {
-    background-color: gray;
+.optionMenu {
     position: absolute;
     top: 70px;
     left: 5px;
-    border-color: black;
+    z-index: 2;
+    height: 80px;
+    width: 80px;
+    color: var(--clr);
+    display: grid;
+    gap: 10px;
+    z-index: 2;
+    
+}
+.optionMenu button {
+    background-color: transparent;
+    border: 10px;
+    padding: 0;
     z-index: 2;
 }
+.optionMenu button hover {
+    background-color: lightblue;
+    border: none;
+    padding: 0;
+}
+
+.optionMenu ion-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10%;
+    color: var(--clr);
+    background-color: grey;
+}
+
+
 
 #additionalButtons {
     display: none;
     grid-template-columns: repeat(1, auto);
     grid-gap: 10px;
     position: absolute;
-    top: 11%;
+    top: 140px;
     left: 5px;
     z-index: 2;
     border-color: black;
@@ -53,29 +79,42 @@ body {
 }
 
 .slider-container {
-    background-color: lightgrey;
+    background: grey;
     color: black;
-    padding: 10px 40px;
+    padding: 10px 20px;
     border: black;
     border-radius: 20px;
     cursor: pointer;
     z-index: 2;
+    
 }
-
 .slider-container {
     display: grid;
-    grid-template-columns: repeat(3, auto);
-    grid-gap: 10px;
+    grid-template-columns: repeat(2, min-content);
+    grid-template-rows: repeat(2, min-content);
+    gap: 10px;
     position: absolute;
-    top: 70px;
-    left: 80px;
+    top: 83%;
+    left: 80%;
+}
+
+.grid-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+.grid-item label{
+    margin-bottom: 10px;
 }
 
 /* CODE BELOW IS ALL TO DO WITH THE PENTIP SELECTION MENU*/
 /*@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
 */
+
 .pen-tip {
-    width: 400px;
+    width: 475px;
     height: 70px;
     background: grey;
     position: absolute;
@@ -90,7 +129,7 @@ body {
 
 .pen-tip ul {
     display: flex;
-    width: 350px;
+    width: 400px;
 }
 
 .pen-tip ul li {
@@ -109,7 +148,9 @@ body {
     flex-direction: column;
     width: 100%;
     text-align: center;
-    font-weight: 500;
+    font-weight: 1000;
+    font-size: x-large;
+    color: black;
 }
 
 .pen-tip ul li a .icon {
@@ -182,21 +223,21 @@ body {
 }
 
 .pen-tip ul li:nth-child(2).active~.indicator {
-    transform: translateX(calc(53px * 1));
+    transform: translateX(calc(55px * 1));
 }
 
 .pen-tip ul li:nth-child(3).active~.indicator {
-    transform: translateX(calc(55px * 2));
+    transform: translateX(calc(57.5px * 2));
 }
 
 .pen-tip ul li:nth-child(4).active~.indicator {
-    transform: translateX(calc(56.5px * 3));
+    transform: translateX(calc(58.5px * 3));
 }
 
 .pen-tip ul li:nth-child(5).active~.indicator {
-    transform: translateX(calc(56.5px * 4));
+    transform: translateX(calc(58px * 4));
 }
 
 .pen-tip ul li:nth-child(6).active~.indicator {
-    transform: translateX(calc(57px * 5));
+    transform: translateX(calc(58.75px * 5));
 }

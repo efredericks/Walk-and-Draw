@@ -13,6 +13,7 @@ let dirty = true;
 let colorPicker, sizeSlider;
 let btnSave, btnClear, btnUndo, btnRedo;
 let eraseEnable = false;
+let isInteracting = false;
 //stamp canvas things
 let popUpCanvas1, popUpCanvasElement1, computedStyle1, stampCanvasWidth1, stampCanvasHeight1;
 let popUpCanvas2, popUpCanvasElement2, computedStyle2, stampCanvasWidth2, stampCanvasHeight2;
@@ -30,7 +31,7 @@ let map1;
 const mapboxAccessToken = 'pk.eyJ1IjoiZ29vZGxpbmEiLCJhIjoiY2xpM2F2ZGlpMGxseDNnbnRqMWl1c3A3bCJ9.WMJlwaLWmoNc-YuSv-92Ow';
 let hollandLatitude = 42.78;
 let hollandLongitude = -86.1089;
-const zoomLevel = 5;
+const zoomLevel = 12;
 
 let marker;
 let currentPosition;
@@ -232,9 +233,19 @@ function draw() {
 }
 
 function saveImg() {
-  var gfx = document.getElementById('canvas')
-  .save('image.png');
-  popUpCanvas1.save('canvas1image')
+  const canvasSave = document.getElementById('canvas')
+  canvasSave.toBlob(function (blob) {
+
+    const anchor = document.getElementById('a');
+    anchor.href = URL.createObjectURL(blob);
+
+    anchor.download = 'canvas_image.png';
+    anchor.click();
+
+    URL.revokeObjectURL(anchor.href);
+  });
+  //.save('image.png');
+  // popUpCanvas1.save('canvas1image')
 }
 
 function clearImg() {
@@ -253,19 +264,15 @@ function changeStroke() {
     dirty = true;
   }
 }
-/*
-function drawHeader() {
-  let hdr = 'GVSU Walk-and-Draw';
-  text(hdr, 3, fontsize / 2);
-  line(0, fontsize, width, fontsize);
-
-  return textWidth(hdr) + 3;
-}**/
 
 function mouseDragged() {
   let x = mouseX;
   let y = mouseY - fontsize;
   // Draw on the pop-up canvas while dragging the mouse
+  console.log(isInteracting);
+  if(isInteracting){
+    return;
+  }
   if (
     mouseX >= canvasLeft1 &&
     mouseX <= canvasLeft1 + stampCanvasWidth1 &&
@@ -283,6 +290,15 @@ function mouseDragged() {
       strokes.push(currentStroke);
     }
     let stroke = currentStroke;
+    if (penTip === 'Eraser') {
+      popUpCanvas1.erase(255, 255);
+      popUpCanvas1.circle(x, y, 10);
+      popUpCanvas1.noErase();
+      popUpCanvas1.clear();
+      clear();
+
+      return;
+    }
     popUpCanvas1.noStroke();
     popUpCanvas1.fill(stroke.color);
     popUpCanvas1.circle(mouseX - canvasLeft1, mouseY - canvasTop1, stroke.size);
@@ -305,6 +321,15 @@ function mouseDragged() {
       strokes.push(currentStroke);
     }
     let stroke = currentStroke;
+    if (penTip === 'Eraser') {
+      popUpCanvas2.erase(255, 255);
+      popUpCanvas2.circle(x, y, 10);
+      popUpCanvas2.noErase();
+      popUpCanvas2.clear();
+      clear();
+
+      return;
+    }
     popUpCanvas2.noStroke();
     popUpCanvas2.fill(stroke.color);
     popUpCanvas2.circle(mouseX - canvasLeft2, mouseY - canvasTop2, stroke.size);
@@ -327,6 +352,15 @@ function mouseDragged() {
       strokes.push(currentStroke);
     }
     let stroke = currentStroke;
+    if (penTip === 'Eraser') {
+      popUpCanvas3.erase(255, 255);
+      popUpCanvas3.circle(x, y, 10);
+      popUpCanvas3.noErase();
+      popUpCanvas3.clear();
+      clear();
+
+      return;
+    }
     popUpCanvas3.noStroke();
     popUpCanvas3.fill(stroke.color);
     popUpCanvas3.circle(mouseX - canvasLeft3, mouseY - canvasTop3, stroke.size);
@@ -355,27 +389,6 @@ function mouseClicked() {
   console.log("x" + mouseX);
   console.log("y" + mouseY);
 
-  if (penTip === 'Stamp') {
-    console.log(selectedStamp);
-
-    if (selectedStamp === 'stamp1') {
-      stamp = popUpCanvas1.get();
-      gfx.image(stamp, mouseX - stamp.width / 2, mouseY - stamp.height / 2);
-      dirty = true;
-      //console.log("try harder");
-    } else if (selectedStamp === 'stamp2') {
-      stamp = popUpCanvas2.get();
-      gfx.image(stamp, mouseX - stamp.width / 2, mouseY - stamp.height / 2);
-      dirty = true;
-      //console.log("try harder2");
-    } else if (selectedStamp === 'stamp3') {
-      stamp = popUpCanvas3.get();
-      gfx.image(stamp, mouseX - stamp.width / 2, mouseY - stamp.height / 2);
-      dirty = true;
-      //console.log("try harder3");
-    }
-  }
-
   if (y > fontsize) {
     if (currentStroke === null) {
       currentStroke = {
@@ -390,30 +403,36 @@ function mouseClicked() {
     currentStroke.points.push({ x: x, y: y });
     drawLine(currentStroke.points.length - 2, currentStroke.points.length - 1);
   }
-}
-
-
-function drawLine(startIndex, endIndex) {
   let stroke = currentStroke;
-  gfx.strokeWeight(stroke.size);
-  gfx.stroke(stroke.color);
+  if (check()) {
+    if (penTip === 'Stamp') {
+      console.log(selectedStamp);
 
-  if (
-    startIndex >= 0 &&
-    startIndex < stroke.points.length &&
-    endIndex >= 0 &&
-    endIndex < stroke.points.length
-  ) {
-    let startPoint = stroke.points[startIndex];
-    let endPoint = stroke.points[endIndex];
+      if (selectedStamp === 'stamp1') {
+        stamp = popUpCanvas1.get();
+        gfx.image(stamp, mouseX - stamp.width / 2, mouseY - stamp.height / 2);
+        dirty = true;
+        //console.log("try harder");
+      } else if (selectedStamp === 'stamp2') {
+        stamp = popUpCanvas2.get();
+        gfx.image(stamp, mouseX - stamp.width / 2, mouseY - stamp.height / 2);
+        dirty = true;
+        //console.log("try harder2");
+      } else if (selectedStamp === 'stamp3') {
+        stamp = popUpCanvas3.get();
+        gfx.image(stamp, mouseX - stamp.width / 2, mouseY - stamp.height / 2);
+        dirty = true;
+        //console.log("try harder3");
+      }
 
-    if (penTip === 'Circle') {
-      gfx.circle(endPoint.x, endPoint.y, stroke.size);
+    } else if (penTip === 'Circle') {
+      console.log("mouseclick circle");
+      gfx.circle(x, y, stroke.size);
     } else if (penTip === 'Square') {
-      gfx.square(endPoint.x, endPoint.y, stroke.size);
+      gfx.square(x, y, stroke.size);
     } else if (penTip === 'Triangle') {
       let halfSize = stroke.size / 2;
-      let angle = atan2(endPoint.y - startPoint.y, endPoint.x - startPoint.x);
+      let angle = atan2(y, x);
 
       let x1 = endPoint.x + cos(angle) * halfSize;
       let y1 = endPoint.y + sin(angle) * halfSize;
@@ -429,151 +448,239 @@ function drawLine(startIndex, endIndex) {
     else if (penTip === 'Eraser') {
       eraseFun(stroke.size, endPoint.x, endPoint.y);
     }
-    // Set the shape property of the current stroke
-    stroke.shape = penTip;
-
-    dirty = true;
   }
-}
-function blob(hue, size, x1, y1) {
-  noStroke();
-
-  // TODO: Potential fix on the GFX / TBD 
-  for (var i = 0; i <= 2; i++) {
-    var rs = random(2.0) - 1.0;
-
-    beginShape();
-    for (var a = 0; a <= 360; a += 10) {
-      var r = (size * 4) + 25 * noise(a + 9 * rs) * 2 - 1;
-      var x = r * cos(a);
-      var y = r * sin(a);
-
-      // Calculate alpha value based on the range of a
-      let alphaValue = mapRange(a, 0, 360, 0, 5); // Adjust the range of alpha values as needed
-      let shapeFillColor = color(hue);
-      shapeFillColor.setAlpha(alphaValue);
-      fill(shapeFillColor);
-      curveVertex(x1 + x, y1 - y);
-    }
-    endShape();
-  }
-}
-function eraseFun(size, x, y) {
-  gfx.erase(255, 255);
-  console.log("ERASEFUN")
-  gfx.fill('red');
-  gfx.circle(x, y, size);
-  gfx.noErase();
-  clear();
-}
-
-
-// Custom mapping function
-function mapRange(value, inputMin, inputMax, outputMin, outputMax) {
-  return ((value - inputMin) * (outputMax - outputMin)) / (inputMax - inputMin) + outputMin;
-}
-
-
-function mouseReleased() {
-  if (currentStroke !== null) {
-    strokes.push(currentStroke);
-    currentStroke = null;
-    savedStrokes = []; // Clear the savedStrokes array
-  }
-}
-
-
-function undo() {
-  if (strokes.length > 0) {
-    let lastStroke = strokes.pop();
-    savedStrokes.push(lastStroke); // Move the stroke to savedStrokes array
-    redrawCanvas();
-  }
-}
-
-
-function redo() {
-  if (savedStrokes.length > 0) {
-    let lastSavedStroke = savedStrokes.pop();
-    strokes.push(lastSavedStroke); // Move the stroke back to strokes array
-    redrawCanvas();
-  }
-}
-
-function redrawCanvas() {
-  gfx.clear();
-  gfx.background(0, 0, 0, 0);
-
-  // Draw strokes from strokes array
-  for (let stroke of strokes) {
-    gfx.strokeWeight(stroke.size);
-    gfx.stroke(stroke.color);
-    for (let i = 0; i < stroke.points.length - 1; i++) {
-      let startPoint = stroke.points[i];
-      let endPoint = stroke.points[i + 1];
-      drawLine(startPoint, endPoint);
-    }
-  }
-
-  // Draw saved strokes from savedStrokes array
-  for (let stroke of savedStrokes) {
-    gfx.strokeWeight(stroke.size);
-    gfx.stroke(stroke.color);
-    for (let i = 0; i < stroke.points.length - 1; i++) {
-      let startPoint = stroke.points[i];
-      let endPoint = stroke.points[i + 1];
-      drawLine(startPoint, endPoint);
-    }
-  }
+  // Set the shape property of the current stroke
+  stroke.shape = penTip;
 
   dirty = true;
 }
-function changeStamp(temp) {
-  selectedStamp = temp;
-  console.log(selectedStamp);
+function check() {
+  if (
+    mouseX >= canvasLeft1 &&
+    mouseX <= canvasLeft1 + stampCanvasWidth1 &&
+    mouseY >= canvasTop1 &&
+    mouseY <= canvasTop1 + stampCanvasHeight1) {
+    return false;
+  }
+  else if (
+    mouseX >= canvasLeft2 &&
+    mouseX <= canvasLeft2 + stampCanvasWidth2 &&
+    mouseY >= canvasTop2 &&
+    mouseY <= canvasTop2 + stampCanvasHeight2) {
+    return false;
+  }
+  else if (
+    mouseX >= canvasLeft3 &&
+    mouseX <= canvasLeft3 + stampCanvasWidth3 &&
+    mouseY >= canvasTop3 &&
+    mouseY <= canvasTop3 + stampCanvasHeight3) {
+    return false;
+  } else
+    return true;
 }
 
 
-// Get the pen tip container and active list item
-const penTipContainer = document.querySelector('.pen-tip');
-let activeListItem = penTipContainer.querySelector('.active');
+  function drawLine(startIndex, endIndex) {
+    let stroke = currentStroke;
+    gfx.strokeWeight(stroke.size);
+    gfx.stroke(stroke.color);
 
-// Add click event listeners to the list items
-var listItems = penTipContainer.querySelectorAll('.list');
-listItems.forEach((listItem) => {
-  listItem.addEventListener('click', () => {
-    // Remove the active class from the previously active list item
-    activeListItem.classList.remove('active');
+    if (
+      startIndex >= 0 &&
+      startIndex < stroke.points.length &&
+      endIndex >= 0 &&
+      endIndex < stroke.points.length
+    ) {
+      let startPoint = stroke.points[startIndex];
+      let endPoint = stroke.points[endIndex];
 
-    // Add the active class to the clicked list item
-    listItem.classList.add('active');
+      if (penTip === 'Circle') {
+        gfx.circle(endPoint.x, endPoint.y, stroke.size);
+      } else if (penTip === 'Square') {
+        gfx.square(endPoint.x, endPoint.y, stroke.size);
+      } else if (penTip === 'Triangle') {
+        let halfSize = stroke.size / 2;
+        let angle = atan2(endPoint.y - startPoint.y, endPoint.x - startPoint.x);
 
-    // Update the active list item
-    activeListItem = listItem;
+        let x1 = endPoint.x + cos(angle) * halfSize;
+        let y1 = endPoint.y + sin(angle) * halfSize;
+        let x2 = endPoint.x + cos(angle + (2 * PI / 3)) * halfSize;
+        let y2 = endPoint.y + sin(angle + (2 * PI / 3)) * halfSize;
+        let x3 = endPoint.x + cos(angle + (4 * PI / 3)) * halfSize;
+        let y3 = endPoint.y + sin(angle + (4 * PI / 3)) * halfSize;
 
-    // Get the selected pen tip
-    let selectedPenTip = listItem.querySelector('.text').textContent;
+        gfx.triangle(x1, y1, x2, y2, x3, y3);
+      } else if (penTip === 'WaterColor') {
+        blob(stroke.color, stroke.size, endPoint.x, endPoint.y);
+      }
+      else if (penTip === 'Eraser') {
+        eraseFun(stroke.size, endPoint.x, endPoint.y);
+      }
+      // Set the shape property of the current stroke
+      stroke.shape = penTip;
 
-    // Update the pen tip in your drawing logic or function
-    updatePenTip(selectedPenTip);
+      dirty = true;
+    }
+  }
+  function blob(hue, size, x1, y1) {
+    noStroke();
+
+    // TODO: Potential fix on the GFX / TBD 
+    for (var i = 0; i <= 2; i++) {
+      var rs = random(2.0) - 1.0;
+
+      beginShape();
+      for (var a = 0; a <= 360; a += 10) {
+        var r = (size * 4) + 25 * noise(a + 9 * rs) * 2 - 1;
+        var x = r * cos(a);
+        var y = r * sin(a);
+
+        // Calculate alpha value based on the range of a
+        let alphaValue = mapRange(a, 0, 360, 0, 5); // Adjust the range of alpha values as needed
+        let shapeFillColor = color(hue);
+        shapeFillColor.setAlpha(alphaValue);
+        fill(shapeFillColor);
+        curveVertex(x1 + x, y1 - y);
+      }
+      endShape();
+    }
+  }
+  function eraseFun(size, x, y) {
+    gfx.erase(255, 255);
+    console.log("ERASEFUN")
+    gfx.fill('red');
+    gfx.circle(x, y, size);
+    gfx.noErase();
+    clear();
+  }
+
+
+  // Custom mapping function
+  function mapRange(value, inputMin, inputMax, outputMin, outputMax) {
+    return ((value - inputMin) * (outputMax - outputMin)) / (inputMax - inputMin) + outputMin;
+  }
+
+
+  function mouseReleased() {
+    if (currentStroke !== null) {
+      strokes.push(currentStroke);
+      currentStroke = null;
+      savedStrokes = []; // Clear the savedStrokes array
+    }
+  }
+
+
+  function undo() {
+    if (strokes.length > 0) {
+      let lastStroke = strokes.pop();
+      savedStrokes.push(lastStroke); // Move the stroke to savedStrokes array
+      redrawCanvas();
+    }
+  }
+
+
+  function redo() {
+    if (savedStrokes.length > 0) {
+      let lastSavedStroke = savedStrokes.pop();
+      strokes.push(lastSavedStroke); // Move the stroke back to strokes array
+      redrawCanvas();
+    }
+  }
+
+  function redrawCanvas() {
+    gfx.clear();
+    gfx.background(0, 0, 0, 0);
+
+    // Draw strokes from strokes array
+    for (let stroke of strokes) {
+      gfx.strokeWeight(stroke.size);
+      gfx.stroke(stroke.color);
+      for (let i = 0; i < stroke.points.length - 1; i++) {
+        let startPoint = stroke.points[i];
+        let endPoint = stroke.points[i + 1];
+        drawLine(startPoint, endPoint);
+      }
+    }
+
+    // Draw saved strokes from savedStrokes array
+    for (let stroke of savedStrokes) {
+      gfx.strokeWeight(stroke.size);
+      gfx.stroke(stroke.color);
+      for (let i = 0; i < stroke.points.length - 1; i++) {
+        let startPoint = stroke.points[i];
+        let endPoint = stroke.points[i + 1];
+        drawLine(startPoint, endPoint);
+      }
+    }
+
+    dirty = true;
+  }
+  function changeStamp(temp) {
+    selectedStamp = temp;
+    console.log(selectedStamp);
+  }
+
+
+  // Get the pen tip container and active list item
+  const penTipContainer = document.querySelector('.pen-tip');
+  let activeListItem = penTipContainer.querySelector('.active');
+
+  // Add click event listeners to the list items
+  var listItems = penTipContainer.querySelectorAll('.list');
+  listItems.forEach((listItem) => {
+    listItem.addEventListener('click', () => {
+      // Remove the active class from the previously active list item
+      activeListItem.classList.remove('active');
+
+      // Add the active class to the clicked list item
+      listItem.classList.add('active');
+
+      // Update the active list item
+      activeListItem = listItem;
+
+      // Get the selected pen tip
+      let selectedPenTip = listItem.querySelector('.text').textContent;
+
+      // Update the pen tip in your drawing logic or function
+      updatePenTip(selectedPenTip);
+    });
   });
-});
 
-// Function to update the pen tip in your drawing logic
-function updatePenTip(selectedPenTip) {
-  penTip = selectedPenTip;
-  console.log(penTip);
-}
-function toggleButtons() {
-  var additionalButtons = document.getElementById('additionalButtons');
-  additionalButtons.style.display = (additionalButtons.style.display === 'none') ? 'grid' : 'none';
+  // Function to update the pen tip in your drawing logic
+  function updatePenTip(selectedPenTip) {
+    penTip = selectedPenTip;
+    console.log(penTip);
+  }
+  function toggleButtons() {
+    var additionalButtons = document.getElementById('additionalButtons');
+    additionalButtons.style.display = (additionalButtons.style.display === 'none') ? 'grid' : 'none';
+  }
+
+  var stampDropDown = document.getElementById('stamp-dropdown');
+  stampDropDown.addEventListener("change", function () {
+    let changedStamp = stampDropDown.options[stampDropDown.selectedIndex].value;
+    console.log("Selected option: " + changedStamp);
+    changeStamp(changedStamp);
+  });
+
+// Add event listeners to buttons and sliders to track touch interactions
+
+function checkInteractions(event) {
+  // Check if the event target is a button or slider
+  const target = event.target;
+  if (target.tagName === 'BUTTON' || target.tagName === 'INPUT') {
+    isInteracting = true;
+  } else {
+    isInteracting = false;
+  }
 }
 
-var stampDropDown = document.getElementById('stamp-dropdown');
-stampDropDown.addEventListener("change", function () {
-  let changedStamp = stampDropDown.options[stampDropDown.selectedIndex].value;
-  console.log("Selected option: " + changedStamp);
-  changeStamp(changedStamp);
-});
+// Add event listeners for touch events to track interactions
+document.addEventListener('touchstart', checkInteractions, true);
+document.addEventListener('touchend', checkInteractions, true);
+
+// Add event listeners for mouse events to track interactions (for desktop)
+document.addEventListener('mousedown', checkInteractions, true);
+document.addEventListener('mouseup', checkInteractions, true);
 
 

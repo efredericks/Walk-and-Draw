@@ -19,8 +19,8 @@
 
         #map {
             position: absolute;
-            top: 4%;
-            bottom: 0;
+            top: 0%;
+            bottom: 0%;
             left: 0%;
             width: 100%;
             z-index: 0;
@@ -74,13 +74,14 @@
         #stamp-dropdown {
             z-index: 3;
             position: absolute;
-            top:510px ;
+            top: 510px;
             right: 30px;
         }
-        #header{
+
+        #header {
             z-index: 3;
             position: absolute;
-            
+
         }
     </style>
 </head>
@@ -89,30 +90,26 @@
     <div id="map"></div>
     <canvas id="canvas"> </canvas>
     <canvas id="stampcanvas1">
-        <label for = 'stampcanvas1'>Stamp 1</label>
     </canvas>
     <canvas id="stampcanvas2"></canvas>
     <canvas id="stampcanvas3"></canvas>
 
-    
-    <img id = "header" src="Buttons/text title.png" alt="header" />
+
+    <img id="header" src="Buttons/text title.png" alt="header" />
 
 
 
     <!-- Buttons -->
-    <button id="mainButton" onclick="toggleButtons()">
-        <img src="Buttons/Options.png" alt="optionsButton" />
-    </button>
-
-    <div id="additionalButtons">
+    <div class="optionMenu">
         <button id="btnSave" onclick="saveImg()">
-            <img src="Buttons/Save.png" alt="savebutton" />
+            <ion-icon name="save-outline"></ion-icon>
         </button>
-
+    
         <button id="btnClear" onclick="clearImg()">
-            <img src="Buttons/Clear.png" alt="clearbutton" />
+            <ion-icon name="trash-outline"></ion-icon>
         </button>
     </div>
+    
     <!--
     <div class="stroke-container">
         <button id="btnUndo" onclick="undo()">
@@ -136,11 +133,16 @@
     </div>
     <!-- Sliders -->
     <div class="slider-container">
-
-        <label for="sliderSize">Pen Size:</label>
-        <input type="color" id="colorPicker" value="#000000">
-        <input type="range" id="sizeSlider" min="1" max="20" value="5">
+        <div class="grid-item">
+            <label for="colorPicker">Color:</label>
+            <input type="color" id="colorPicker" value="#000000">
+        </div>
+        <div class="grid-item">
+            <label for="sliderSize">Pen Size:</label>
+            <input type="range" id="sizeSlider" min="1" max="20" value="5">
+        </div>
     </div>
+
     <div class="pen-tip">
         <ul>
             <li class="list active">
@@ -172,7 +174,7 @@
                     <span class="icon">
                         <ion-icon name="water-outline"></ion-icon>
                     </span>
-                    <span class="text">WaterColor</span>
+                    <span class="text">Water</span>
                 </a>
             </li>
             <li class="list">
