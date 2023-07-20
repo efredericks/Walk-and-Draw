@@ -378,7 +378,7 @@ function mouseDragged() {
       strokes.push(currentStroke);
     }
 
-
+    console.log("1");
     currentStroke.points.push({ x: x, y: y });
     drawLine(currentStroke.points.length - 2, currentStroke.points.length - 1);
   }
@@ -484,6 +484,7 @@ function check() {
     let stroke = currentStroke;
     gfx.strokeWeight(stroke.size);
     gfx.stroke(stroke.color);
+    console.log(penTip + "pentip");
 
     if (
       startIndex >= 0 &&
@@ -510,7 +511,8 @@ function check() {
         let y3 = endPoint.y + sin(angle + (4 * PI / 3)) * halfSize;
 
         gfx.triangle(x1, y1, x2, y2, x3, y3);
-      } else if (penTip === 'WaterColor') {
+      } else if (penTip === 'Water') {
+        console.log("2");
         blob(stroke.color, stroke.size, endPoint.x, endPoint.y);
       }
       else if (penTip === 'Eraser') {
@@ -528,6 +530,7 @@ function check() {
     // TODO: Potential fix on the GFX / TBD 
     for (var i = 0; i <= 2; i++) {
       var rs = random(2.0) - 1.0;
+      console.log("3");
 
       beginShape();
       for (var a = 0; a <= 360; a += 10) {
