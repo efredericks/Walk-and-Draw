@@ -95,7 +95,7 @@ body {
     gap: 10px;
     position: absolute;
     top: 83%;
-    left: 80%;
+    right: 80%;
 }
 
 .grid-item {
