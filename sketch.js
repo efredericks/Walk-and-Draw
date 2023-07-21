@@ -232,20 +232,21 @@ function draw() {
 }
 
 function saveImg() {
-  const canvasSave = document.getElementById('canvas')
-  canvasSave.toBlob(function(blob) {
+  const canvasSave = document.getElementById('canvas');
+  const imageURL = canvasSave.toDataURL('image/png'); // Convert canvas to data URL
+  console.log(imageURL);
 
-    const anchor = document.getElementById('a');
-    anchor.href = URL.createObjectURL(blob);
+  // Create an anchor element to provide the user with a link to the image data URL
+  const anchor = document.createElement('a');
+  anchor.href = imageURL;
+  anchor.download = 'canvas_image.png'; // Set the desired file name
+  anchor.click();
 
-    anchor.download = 'canvas_image.png';
-    anchor.click();
-
-    URL.revokeObjectURL(anchor.href);
-  });
-  //.save('image.png');
- // popUpCanvas1.save('canvas1image')
+  // Revoke the data URL to free up memory
+  URL.revokeObjectURL(anchor.href);
 }
+
+
 
 function clearImg() {
   dirty = true;
@@ -406,26 +407,12 @@ function mouseClicked() {
 
   } else if (penTip === 'Circle') {
     console.log("mouseclick circle");
-    gfx.circle(x,y, stroke.size);
+    gfx.circle(x, y, stroke.size);
   } else if (penTip === 'Square') {
-    gfx.square(x,y, stroke.size);
-  } else if (penTip === 'Triangle') {
-    let halfSize = stroke.size / 2;
-    let angle = atan2(y, x);
-
-    let x1 = endPoint.x + cos(angle) * halfSize;
-    let y1 = endPoint.y + sin(angle) * halfSize;
-    let x2 = endPoint.x + cos(angle + (2 * PI / 3)) * halfSize;
-    let y2 = endPoint.y + sin(angle + (2 * PI / 3)) * halfSize;
-    let x3 = endPoint.x + cos(angle + (4 * PI / 3)) * halfSize;
-    let y3 = endPoint.y + sin(angle + (4 * PI / 3)) * halfSize;
-
-    gfx.triangle(x1, y1, x2, y2, x3, y3);
-  } else if (penTip === 'WaterColor') {
-    blob(stroke.color, stroke.size, endPoint.x, endPoint.y);
-  }
+    gfx.square(x, y, stroke.size);
+  }  
   else if (penTip === 'Eraser') {
-    eraseFun(stroke.size, endPoint.x, endPoint.y);
+    eraseFun(stroke.size, x, y);
   }
   // Set the shape property of the current stroke
   stroke.shape = penTip;
