@@ -24,7 +24,7 @@ body {
     padding: 0;
     z-index: 2;
 }
-.optionMenu button Hover {
+.optionMenu button hover {
     background-color: lightblue;
     border: none;
     padding: 0;
