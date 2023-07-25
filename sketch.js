@@ -21,6 +21,7 @@ let popUpCanvas3, popUpCanvasElement3, computedStyle3, stampCanvasWidth3, stampC
 let canvasRect1, canvasLeft1, canvasTop1;
 let canvasRect2, canvasLeft2, canvasTop2;
 let canvasRect3, canvasLeft3, canvasTop3;
+let canvasClickSelectionLabel;
 let selectedStamp;
 let stamp = 'stamp1';
 let backgroundColor = "#FFFFFF"; // Initial background color (white)
@@ -31,22 +32,24 @@ let map1;
 const mapboxAccessToken = 'pk.eyJ1IjoiZ29vZGxpbmEiLCJhIjoiY2xpM2F2ZGlpMGxseDNnbnRqMWl1c3A3bCJ9.WMJlwaLWmoNc-YuSv-92Ow';
 let hollandLatitude = 42.78;
 let hollandLongitude = -86.1089;
-const zoomLevel = 12;
+const zoomLevel = 14;
+let currentLong, currentLat;
 
 let marker;
 let currentPosition;
 var img;
 
 
-function setUpMap() {
+function setUpMap(latitude, longitude) {
   mapboxgl.accessToken = mapboxAccessToken;
+  console.log("lat: ",latitude, "long: ", longitude);
   map1 = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/streets-v11',
-    center: [hollandLongitude, hollandLatitude],
+    center: [longitude, latitude],
     zoom: zoomLevel
   });
-
+  //this all goes together
   map1.on('load', () => {
     map1.addSource('current-location', {
       type: 'geojson',
@@ -54,7 +57,7 @@ function setUpMap() {
         type: 'Feature',
         geometry: {
           type: 'Point',
-          coordinates: [hollandLongitude, hollandLatitude]
+          coordinates: [longitude, latitude]
         }
       }
     });
@@ -64,39 +67,60 @@ function setUpMap() {
       type: 'circle',
       source: 'current-location',
       paint: {
-        'circle-radius': 5,
-        'circle-color': 'blue',
+        'circle-radius': 8,
+        'circle-color': 'green',
         'circle-stroke-width': 2,
         'circle-stroke-color': 'white'
       }
     });
   });
+  //to here
+  loopLocation();
+}
 
+function loopLocation(){
   if (navigator.geolocation) {
     navigator.geolocation.watchPosition(position => {
-      hollandLatitude = position.coords.latitude;
-      hollandLongitude = position.coords.longitude;
+      currentLatitude = position.coords.latitude;
+      currentLongitude = position.coords.longitude;
       updateDotPosition();
     });
   }
 }
+//longitude and latitude are measurements for the map to be centered.
+//currentLongitude and currentLatitude are the ones for the dot specifically
 
 function updateDotPosition() {
   map1.getSource('current-location').setData({
     type: 'Feature',
     geometry: {
       type: 'Point',
-      coordinates: [hollandLongitude, hollandLatitude]
+      coordinates: [currentLongitude, currentLatitude]
+    }
+  })
+  console.log("lat: ",currentLatitude, "long: ", currentLongitude);
+ loopLocation();
+
+}
+ 
+
+function trackUserLocation() {
+  return new Promise((resolve, reject) => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const latitude = position.coords.latitude;
+          const longitude = position.coords.longitude;
+          resolve({ latitude, longitude });
+        },
+        (error) => {
+          reject(error.message);
+        }
+      );
+    } else {
+      reject("Geolocation is not supported by this browser.");
     }
   });
-}
-
-function trackCurrentLocation() {
-  if (navigator.geolocation) {
-    navigator.geolocation.watchPosition(position => {
-      currentPosition = position;
-    });
-  }
 }
 
 function setup() {
@@ -138,8 +162,16 @@ function setup() {
 
 
   gfx.noStroke();
-  setUpMap();
-  trackCurrentLocation();
+
+//promise for users location
+  trackUserLocation()
+    .then((locationData) => {
+      const { latitude, longitude } = locationData;
+      console.log("before send" + latitude + longitude);
+      setUpMap(latitude, longitude);
+    }).catch((error) => {
+      console.error("Error getting the users location", error);
+    });
 }
 function createStampCanvases() {
   //stampcanvas top
@@ -270,7 +302,7 @@ function mouseDragged() {
   let y = mouseY - fontsize;
   // Draw on the pop-up canvas while dragging the mouse
   console.log(isInteracting);
-  if(isInteracting){
+  if (isInteracting) {
     return;
   }
   if (
@@ -290,18 +322,20 @@ function mouseDragged() {
       strokes.push(currentStroke);
     }
     let stroke = currentStroke;
+
     if (penTip === 'Eraser') {
       popUpCanvas1.erase(255, 255);
       popUpCanvas1.circle(x, y, 10);
       popUpCanvas1.noErase();
       popUpCanvas1.clear();
       clear();
-
+      dirty = true;
       return;
     }
-    popUpCanvas1.noStroke();
-    popUpCanvas1.fill(stroke.color);
-    popUpCanvas1.circle(mouseX - canvasLeft1, mouseY - canvasTop1, stroke.size);
+    //popUpCanvas1.noStroke();
+    //popUpCanvas1.fill(stroke.color);
+    // popUpCanvas1.circle(mouseX - canvasLeft1, mouseY - canvasTop1, stroke.size);
+    clickOnCanvas1(stroke);
 
     return;
   } else if (
@@ -327,12 +361,13 @@ function mouseDragged() {
       popUpCanvas2.noErase();
       popUpCanvas2.clear();
       clear();
-
+      dirty = true;
       return;
     }
-    popUpCanvas2.noStroke();
-    popUpCanvas2.fill(stroke.color);
-    popUpCanvas2.circle(mouseX - canvasLeft2, mouseY - canvasTop2, stroke.size);
+    //popUpCanvas2.noStroke();
+    //popUpCanvas2.fill(stroke.color);
+    //popUpCanvas2.circle(mouseX - canvasLeft2, mouseY - canvasTop2, stroke.size);
+    clickOnCanvas2(stroke);
     return;
   }
   else if (
@@ -358,12 +393,13 @@ function mouseDragged() {
       popUpCanvas3.noErase();
       popUpCanvas3.clear();
       clear();
-
+      dirty = true;
       return;
     }
-    popUpCanvas3.noStroke();
-    popUpCanvas3.fill(stroke.color);
-    popUpCanvas3.circle(mouseX - canvasLeft3, mouseY - canvasTop3, stroke.size);
+    //popUpCanvas3.noStroke();
+    //popUpCanvas3.fill(stroke.color);
+    // popUpCanvas3.circle(mouseX - canvasLeft3, mouseY - canvasTop3, stroke.size);
+    clickOnCanvas3(stroke);
     return;
   }
 
@@ -405,8 +441,10 @@ function mouseClicked() {
   }
   let stroke = currentStroke;
   if (check()) {
+    console.log("canvas selection: " + canvasClickSelectionLabel);
     if (penTip === 'Stamp') {
       console.log(selectedStamp);
+      //console.log(canvasClickSelectionLabel + "HELLO");
 
       if (selectedStamp === 'stamp1') {
         stamp = popUpCanvas1.get();
@@ -431,24 +469,37 @@ function mouseClicked() {
     } else if (penTip === 'Square') {
       gfx.square(x, y, stroke.size);
     } else if (penTip === 'Triangle') {
-      
-/** 
-      let x1 = x + stroke.size;
-      let y1 = y;
-      let x2 = x - (stroke.size/2);
-      let y2 = y - (stroke.size/2);
-      let x3 = x - (stroke.size/2);
-      let y3 = y + (stroke.size/2);
-      console.log(stroke.size + " SIZE");
-*/
+      let moving = stroke.size / 1.2;
+
+      let x1 = x;
+      let y1 = y - moving;
+      let x2 = x + moving;
+      let y2 = y + moving;
+      let x3 = x - moving;
+      let y3 = y + moving;
+      //console.log(stroke.size + " SIZE");
+      //console.log( "x1:"+ x1 + " y1:" +y1 + "    x2:"+ x2 + " y2:" +y2 + "    x3:"+ x3 + " y3:" +y3 );
+
       gfx.triangle(x1, y1, x2, y2, x3, y3);
     } else if (penTip === 'WaterColor') {
-      blob(stroke.color, stroke.size, endPoint.x, endPoint.y);
-    }
-    else if (penTip === 'Eraser') {
-      eraseFun(stroke.size, endPoint.x, endPoint.y);
+      console.log("NO");
     }
   }
+  console.log(canvasClickSelectionLabel + " before");
+  switch (canvasClickSelectionLabel) {
+    case 1: clickOnCanvas1(currentStroke);
+      canvasClickSelectionLabel = 0;
+      break;
+    case 2: clickOnCanvas2(currentStroke);
+      canvasClickSelectionLabel = 0;
+      break;
+    case 3: clickOnCanvas3(currentStroke);
+      canvasClickSelectionLabel = 0;
+      break;
+    default:
+      break;
+  }
+  console.log("after: " + canvasClickSelectionLabel);
   // Set the shape property of the current stroke
   stroke.shape = penTip;
 
@@ -460,211 +511,304 @@ function check() {
     mouseX <= canvasLeft1 + stampCanvasWidth1 &&
     mouseY >= canvasTop1 &&
     mouseY <= canvasTop1 + stampCanvasHeight1) {
-    return 1;
+    canvasClickSelectionLabel = 1;
+    return false;
   }
   else if (
     mouseX >= canvasLeft2 &&
     mouseX <= canvasLeft2 + stampCanvasWidth2 &&
     mouseY >= canvasTop2 &&
     mouseY <= canvasTop2 + stampCanvasHeight2) {
-    return 2;
+    canvasClickSelectionLabel = 2;
+    return false;
   }
   else if (
     mouseX >= canvasLeft3 &&
     mouseX <= canvasLeft3 + stampCanvasWidth3 &&
     mouseY >= canvasTop3 &&
     mouseY <= canvasTop3 + stampCanvasHeight3) {
-    return 3;
+    canvasClickSelectionLabel = 3;
+    return false;
   } else
     return 4;
 }
+function clickOnCanvas1(stroke1) {
+  let stroke = stroke1;
+  popUpCanvas1.strokeWeight(stroke.size);
+  popUpCanvas1.stroke(stroke.color);
+  console.log("canvas 1 click working");
 
 
-  function drawLine(startIndex, endIndex) {
-    let stroke = currentStroke;
-    gfx.strokeWeight(stroke.size);
-    gfx.stroke(stroke.color);
-    console.log(penTip + "pentip");
+  if (penTip === 'Circle') {
+    console.log("mouseclick circle");
+    popUpCanvas1.circle(mouseX - canvasLeft1, mouseY - canvasTop1, stroke.size);
+  } else if (penTip === 'Square') {
+    popUpCanvas1.square(mouseX - canvasLeft1, mouseY - canvasTop1, stroke.size);
+  } else if (penTip === 'Triangle') {
+    let moving = stroke.size / 1.2;
 
-    if (
-      startIndex >= 0 &&
-      startIndex < stroke.points.length &&
-      endIndex >= 0 &&
-      endIndex < stroke.points.length
-    ) {
-      let startPoint = stroke.points[startIndex];
-      let endPoint = stroke.points[endIndex];
+    let x1 = mouseX;
+    let y1 = mouseY - moving;
+    let x2 = mouseX + moving;
+    let y2 = mouseY + moving;
+    let x3 = mouseX - moving;
+    let y3 = mouseY + moving;
+    //console.log(stroke.size + " SIZE");
+    //console.log( "x1:"+ x1 + " y1:" +y1 + "    x2:"+ x2 + " y2:" +y2 + "    x3:"+ x3 + " y3:" +y3 );
 
-      if (penTip === 'Circle') {
-        gfx.circle(endPoint.x, endPoint.y, stroke.size);
-      } else if (penTip === 'Square') {
-        gfx.square(endPoint.x, endPoint.y, stroke.size);
-      } else if (penTip === 'Triangle') {
-        let halfSize = stroke.size / 2;
-        let angle = atan2(endPoint.y - startPoint.y, endPoint.x - startPoint.x);
-
-        let x1 = endPoint.x + cos(angle) * halfSize;
-        let y1 = endPoint.y + sin(angle) * halfSize;
-        let x2 = endPoint.x + cos(angle + (2 * PI / 3)) * halfSize;
-        let y2 = endPoint.y + sin(angle + (2 * PI / 3)) * halfSize;
-        let x3 = endPoint.x + cos(angle + (4 * PI / 3)) * halfSize;
-        let y3 = endPoint.y + sin(angle + (4 * PI / 3)) * halfSize;
-
-        gfx.triangle(x1, y1, x2, y2, x3, y3);
-      } else if (penTip === 'Water') {
-        console.log("2");
-        blob(stroke.color, stroke.size, endPoint.x, endPoint.y);
-      }
-      else if (penTip === 'Eraser') {
-        eraseFun(stroke.size, endPoint.x, endPoint.y);
-      }
-      // Set the shape property of the current stroke
-      stroke.shape = penTip;
-
-      dirty = true;
-    }
+    popUpCanvas1.triangle(x1 - canvasLeft1, y1 - canvasTop1, x2 - canvasLeft1, y2 - canvasTop1, x3 - canvasLeft1, y3 - canvasTop1);
   }
-  function blob(hue, size, x1, y1) {
-    noStroke();
+  stroke.shape = penTip;
+  dirty = true;
 
-    // TODO: Potential fix on the GFX / TBD 
-    for (var i = 0; i <= 2; i++) {
-      var rs = random(2.0) - 1.0;
-      console.log("3");
+}
+function clickOnCanvas2(stroke2) {
+  let stroke = stroke2;
+  popUpCanvas2.strokeWeight(stroke.size);
+  popUpCanvas2.stroke(stroke.color);
+  console.log("canvas 2 click working");
 
-      beginShape();
-      for (var a = 0; a <= 360; a += 10) {
-        var r = (size * 4) + 25 * noise(a + 9 * rs) * 2 - 1;
-        var x = r * cos(a);
-        var y = r * sin(a);
 
-        // Calculate alpha value based on the range of a
-        let alphaValue = mapRange(a, 0, 360, 0, 5); // Adjust the range of alpha values as needed
-        let shapeFillColor = color(hue);
-        shapeFillColor.setAlpha(alphaValue);
-        fill(shapeFillColor);
-        curveVertex(x1 + x, y1 - y);
-      }
-      endShape();
-    }
+  if (penTip === 'Circle') {
+    console.log("mouseclick circle");
+    popUpCanvas2.circle(mouseX - canvasLeft2, mouseY - canvasTop2, stroke.size);
+  } else if (penTip === 'Square') {
+    popUpCanvas2.square(mouseX - canvasLeft2, mouseY - canvasTop2, stroke.size);
+  } else if (penTip === 'Triangle') {
+    let moving = stroke.size / 1.2;
+
+    let x1 = mouseX;
+    let y1 = mouseY - moving;
+    let x2 = mouseX + moving;
+    let y2 = mouseY + moving;
+    let x3 = mouseX - moving;
+    let y3 = mouseY + moving;
+    //console.log(stroke.size + " SIZE");
+    //console.log( "x1:"+ x1 + " y1:" +y1 + "    x2:"+ x2 + " y2:" +y2 + "    x3:"+ x3 + " y3:" +y3 );
+
+    popUpCanvas2.triangle(x1 - canvasLeft2, y1 - canvasTop2, x2 - canvasLeft2, y2 - canvasTop2, x3 - canvasLeft2, y3 - canvasTop2);
   }
-  function eraseFun(size, x, y) {
-    gfx.erase(255, 255);
-    console.log("ERASEFUN")
-    gfx.fill('red');
-    gfx.circle(x, y, size);
-    gfx.noErase();
-    clear();
+  stroke.shape = penTip;
+  dirty = true;
+
+}
+function clickOnCanvas3(stroke3) {
+  let stroke = stroke3;
+  popUpCanvas3.strokeWeight(stroke.size);
+  popUpCanvas3.stroke(stroke.color);
+  console.log("canvas 3 click working");
+
+
+  if (penTip === 'Circle') {
+    console.log("mouseclick circle");
+    popUpCanvas3.circle(mouseX - canvasLeft3, mouseY - canvasTop3, stroke.size);
+  } else if (penTip === 'Square') {
+    popUpCanvas3.square(mouseX - canvasLeft3, mouseY - canvasTop3, stroke.size);
+  } else if (penTip === 'Triangle') {
+    let moving = stroke.size / 1.2;
+
+    let x1 = mouseX;
+    let y1 = mouseY - moving;
+    let x2 = mouseX + moving;
+    let y2 = mouseY + moving;
+    let x3 = mouseX - moving;
+    let y3 = mouseY + moving;
+    //console.log(stroke.size + " SIZE");
+    //console.log( "x1:"+ x1 + " y1:" +y1 + "    x2:"+ x2 + " y2:" +y2 + "    x3:"+ x3 + " y3:" +y3 );
+
+    popUpCanvas3.triangle(x1 - canvasLeft3, y1 - canvasTop3, x2 - canvasLeft3, y2 - canvasTop3, x3 - canvasLeft3, y3 - canvasTop3);
   }
+  stroke.shape = penTip;
+  dirty = true;
+
+}
 
 
-  // Custom mapping function
-  function mapRange(value, inputMin, inputMax, outputMin, outputMax) {
-    return ((value - inputMin) * (outputMax - outputMin)) / (inputMax - inputMin) + outputMin;
-  }
+function drawLine(startIndex, endIndex) {
+  let stroke = currentStroke;
+  gfx.strokeWeight(stroke.size);
+  gfx.stroke(stroke.color);
+  console.log("pentip: " + penTip);
 
+  if (
+    startIndex >= 0 &&
+    startIndex < stroke.points.length &&
+    endIndex >= 0 &&
+    endIndex < stroke.points.length
+  ) {
+    let startPoint = stroke.points[startIndex];
+    let endPoint = stroke.points[endIndex];
 
-  function mouseReleased() {
-    if (currentStroke !== null) {
-      strokes.push(currentStroke);
-      currentStroke = null;
-      savedStrokes = []; // Clear the savedStrokes array
+    if (penTip === 'Circle') {
+      gfx.circle(endPoint.x, endPoint.y, stroke.size);
+    } else if (penTip === 'Square') {
+      gfx.square(endPoint.x, endPoint.y, stroke.size);
+    } else if (penTip === 'Triangle') {
+      let halfSize = stroke.size / 2;
+      let angle = atan2(endPoint.y - startPoint.y, endPoint.x - startPoint.x);
+
+      let x1 = endPoint.x + cos(angle) * halfSize;
+      let y1 = endPoint.y + sin(angle) * halfSize;
+      let x2 = endPoint.x + cos(angle + (2 * PI / 3)) * halfSize;
+      let y2 = endPoint.y + sin(angle + (2 * PI / 3)) * halfSize;
+      let x3 = endPoint.x + cos(angle + (4 * PI / 3)) * halfSize;
+      let y3 = endPoint.y + sin(angle + (4 * PI / 3)) * halfSize;
+
+      gfx.triangle(x1, y1, x2, y2, x3, y3);
+    } else if (penTip === 'Water') {
+      console.log("2");
+      blob(stroke.color, stroke.size, endPoint.x, endPoint.y);
     }
-  }
-
-
-  function undo() {
-    if (strokes.length > 0) {
-      let lastStroke = strokes.pop();
-      savedStrokes.push(lastStroke); // Move the stroke to savedStrokes array
-      redrawCanvas();
+    else if (penTip === 'Eraser') {
+      eraseFun(stroke.size, endPoint.x, endPoint.y);
     }
-  }
-
-
-  function redo() {
-    if (savedStrokes.length > 0) {
-      let lastSavedStroke = savedStrokes.pop();
-      strokes.push(lastSavedStroke); // Move the stroke back to strokes array
-      redrawCanvas();
-    }
-  }
-
-  function redrawCanvas() {
-    gfx.clear();
-    gfx.background(0, 0, 0, 0);
-
-    // Draw strokes from strokes array
-    for (let stroke of strokes) {
-      gfx.strokeWeight(stroke.size);
-      gfx.stroke(stroke.color);
-      for (let i = 0; i < stroke.points.length - 1; i++) {
-        let startPoint = stroke.points[i];
-        let endPoint = stroke.points[i + 1];
-        drawLine(startPoint, endPoint);
-      }
-    }
-
-    // Draw saved strokes from savedStrokes array
-    for (let stroke of savedStrokes) {
-      gfx.strokeWeight(stroke.size);
-      gfx.stroke(stroke.color);
-      for (let i = 0; i < stroke.points.length - 1; i++) {
-        let startPoint = stroke.points[i];
-        let endPoint = stroke.points[i + 1];
-        drawLine(startPoint, endPoint);
-      }
-    }
+    // Set the shape property of the current stroke
+    stroke.shape = penTip;
 
     dirty = true;
   }
-  function changeStamp(temp) {
-    selectedStamp = temp;
-    console.log(selectedStamp);
+}
+function blob(hue, size, x1, y1) {
+  noStroke();
+
+  // TODO: Potential fix on the GFX / TBD 
+  for (var i = 0; i <= 2; i++) {
+    var rs = random(2.0) - 1.0;
+    console.log("3");
+
+    beginShape();
+    for (var a = 0; a <= 360; a += 10) {
+      var r = (size * 4) + 25 * noise(a + 9 * rs) * 2 - 1;
+      var x = r * cos(a);
+      var y = r * sin(a);
+
+      // Calculate alpha value based on the range of a
+      let alphaValue = mapRange(a, 0, 360, 0, 5); // Adjust the range of alpha values as needed
+      let shapeFillColor = color(hue);
+      shapeFillColor.setAlpha(alphaValue);
+      fill(shapeFillColor);
+      curveVertex(x1 + x, y1 - y);
+    }
+    endShape();
+  }
+}
+function eraseFun(size, x, y) {
+  gfx.erase(255, 255);
+  console.log("ERASEFUN")
+  gfx.fill('red');
+  gfx.circle(x, y, size);
+  gfx.noErase();
+  clear();
+}
+
+
+// Custom mapping function
+function mapRange(value, inputMin, inputMax, outputMin, outputMax) {
+  return ((value - inputMin) * (outputMax - outputMin)) / (inputMax - inputMin) + outputMin;
+}
+
+
+function mouseReleased() {
+  if (currentStroke !== null) {
+    strokes.push(currentStroke);
+    currentStroke = null;
+    savedStrokes = []; // Clear the savedStrokes array
+  }
+}
+
+
+function undo() {
+  if (strokes.length > 0) {
+    let lastStroke = strokes.pop();
+    savedStrokes.push(lastStroke); // Move the stroke to savedStrokes array
+    redrawCanvas();
+  }
+}
+
+
+function redo() {
+  if (savedStrokes.length > 0) {
+    let lastSavedStroke = savedStrokes.pop();
+    strokes.push(lastSavedStroke); // Move the stroke back to strokes array
+    redrawCanvas();
+  }
+}
+
+function redrawCanvas() {
+  gfx.clear();
+  gfx.background(0, 0, 0, 0);
+
+  // Draw strokes from strokes array
+  for (let stroke of strokes) {
+    gfx.strokeWeight(stroke.size);
+    gfx.stroke(stroke.color);
+    for (let i = 0; i < stroke.points.length - 1; i++) {
+      let startPoint = stroke.points[i];
+      let endPoint = stroke.points[i + 1];
+      drawLine(startPoint, endPoint);
+    }
   }
 
+  // Draw saved strokes from savedStrokes array
+  for (let stroke of savedStrokes) {
+    gfx.strokeWeight(stroke.size);
+    gfx.stroke(stroke.color);
+    for (let i = 0; i < stroke.points.length - 1; i++) {
+      let startPoint = stroke.points[i];
+      let endPoint = stroke.points[i + 1];
+      drawLine(startPoint, endPoint);
+    }
+  }
 
-  // Get the pen tip container and active list item
-  const penTipContainer = document.querySelector('.pen-tip');
-  let activeListItem = penTipContainer.querySelector('.active');
+  dirty = true;
+}
+function changeStamp(temp) {
+  selectedStamp = temp;
+  console.log(selectedStamp);
+}
 
-  // Add click event listeners to the list items
-  var listItems = penTipContainer.querySelectorAll('.list');
-  listItems.forEach((listItem) => {
-    listItem.addEventListener('click', () => {
-      // Remove the active class from the previously active list item
-      activeListItem.classList.remove('active');
 
-      // Add the active class to the clicked list item
-      listItem.classList.add('active');
+// Get the pen tip container and active list item
+const penTipContainer = document.querySelector('.pen-tip');
+let activeListItem = penTipContainer.querySelector('.active');
 
-      // Update the active list item
-      activeListItem = listItem;
+// Add click event listeners to the list items
+var listItems = penTipContainer.querySelectorAll('.list');
+listItems.forEach((listItem) => {
+  listItem.addEventListener('click', () => {
+    // Remove the active class from the previously active list item
+    activeListItem.classList.remove('active');
 
-      // Get the selected pen tip
-      let selectedPenTip = listItem.querySelector('.text').textContent;
+    // Add the active class to the clicked list item
+    listItem.classList.add('active');
 
-      // Update the pen tip in your drawing logic or function
-      updatePenTip(selectedPenTip);
-    });
+    // Update the active list item
+    activeListItem = listItem;
+
+    // Get the selected pen tip
+    let selectedPenTip = listItem.querySelector('.text').textContent;
+
+    // Update the pen tip in your drawing logic or function
+    updatePenTip(selectedPenTip);
   });
+});
 
-  // Function to update the pen tip in your drawing logic
-  function updatePenTip(selectedPenTip) {
-    penTip = selectedPenTip;
-    console.log(penTip);
-  }
-  function toggleButtons() {
-    var additionalButtons = document.getElementById('additionalButtons');
-    additionalButtons.style.display = (additionalButtons.style.display === 'none') ? 'grid' : 'none';
-  }
+// Function to update the pen tip in your drawing logic
+function updatePenTip(selectedPenTip) {
+  penTip = selectedPenTip;
+  console.log(penTip);
+}
+function toggleButtons() {
+  var additionalButtons = document.getElementById('additionalButtons');
+  additionalButtons.style.display = (additionalButtons.style.display === 'none') ? 'grid' : 'none';
+}
 
-  var stampDropDown = document.getElementById('stamp-dropdown');
-  stampDropDown.addEventListener("change", function () {
-    let changedStamp = stampDropDown.options[stampDropDown.selectedIndex].value;
-    console.log("Selected option: " + changedStamp);
-    changeStamp(changedStamp);
-  });
+var stampDropDown = document.getElementById('stamp-dropdown');
+stampDropDown.addEventListener("change", function () {
+  let changedStamp = stampDropDown.options[stampDropDown.selectedIndex].value;
+  console.log("Selected option: " + changedStamp);
+  changeStamp(changedStamp);
+});
 
 // Add event listeners to buttons and sliders to track touch interactions
 
