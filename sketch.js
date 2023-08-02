@@ -99,9 +99,9 @@ function updateDotPosition() {
     }
   })
   console.log("lat: ",currentLatitude, "long: ", currentLongitude);
- loopLocation();
 
 }
+loopLocation();
  
 
 function trackUserLocation() {
