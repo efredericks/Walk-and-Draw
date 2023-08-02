@@ -32,12 +32,13 @@ let map1;
 const mapboxAccessToken = 'pk.eyJ1IjoiZ29vZGxpbmEiLCJhIjoiY2xpM2F2ZGlpMGxseDNnbnRqMWl1c3A3bCJ9.WMJlwaLWmoNc-YuSv-92Ow';
 let hollandLatitude = 42.78;
 let hollandLongitude = -86.1089;
-const zoomLevel = 14;
+const zoomLevel = 17;
 let currentLong, currentLat;
 
 let marker;
 let currentPosition;
 var img;
+let prevX, prevY;
 
 
 function setUpMap(latitude, longitude) {
@@ -67,8 +68,8 @@ function setUpMap(latitude, longitude) {
       type: 'circle',
       source: 'current-location',
       paint: {
-        'circle-radius': 8,
-        'circle-color': 'green',
+        'circle-radius': 4,
+        'circle-color': 'blue',
         'circle-stroke-width': 2,
         'circle-stroke-color': 'white'
       }
@@ -143,7 +144,7 @@ function setup() {
 
   //creation of the stampping canvas
   let CreateCanvases = createStampCanvases();
-  frameRate(120);
+  frameRate(60);
 
   //let titleWidth = drawHeader();
 
@@ -345,20 +346,47 @@ function changeStroke() {
   }
 }
 
+function isInsideCanvas1(x, y) {
+  return (
+    x >= canvasLeft1 &&
+    x <= canvasLeft1 + stampCanvasWidth1 &&
+    y >= canvasTop1 &&
+    y <= canvasTop1 + stampCanvasHeight1
+  );
+}
+
+// Function to check if the mouse is inside canvas 2
+function isInsideCanvas2(x, y) {
+  return (
+    x >= canvasLeft2 &&
+    x <= canvasLeft2 + stampCanvasWidth2 &&
+    y >= canvasTop2 &&
+    y <= canvasTop2 + stampCanvasHeight2
+  );
+}
+
+// Function to check if the mouse is inside canvas 3
+function isInsideCanvas3(x, y) {
+  return (
+    x >= canvasLeft3 &&
+    x <= canvasLeft3 + stampCanvasWidth3 &&
+    y >= canvasTop3 &&
+    y <= canvasTop3 + stampCanvasHeight3
+  );
+}
+
+
+
 function mouseDragged() {
   let x = mouseX;
   let y = mouseY - fontsize;
-  // Draw on the pop-up canvas while dragging the mouse
-  console.log(isInteracting);
+  
   if (isInteracting) {
     return;
   }
-  if (
-    mouseX >= canvasLeft1 &&
-    mouseX <= canvasLeft1 + stampCanvasWidth1 &&
-    mouseY >= canvasTop1 &&
-    mouseY <= canvasTop1 + stampCanvasHeight1
-  ) {
+
+  // Check if the mouse is inside the canvas area for drawing
+  if (isInsideCanvas1(x, y)) {
     console.log("we made it into canvas 1");
     if (currentStroke === null) {
       currentStroke = {
@@ -380,50 +408,38 @@ function mouseDragged() {
       dirty = true;
       return;
     }
-    //popUpCanvas1.noStroke();
-    //popUpCanvas1.fill(stroke.color);
-    // popUpCanvas1.circle(mouseX - canvasLeft1, mouseY - canvasTop1, stroke.size);
     clickOnCanvas1(stroke);
-
     return;
-  } else if (
-    mouseX >= canvasLeft2 &&
-    mouseX <= canvasLeft2 + stampCanvasWidth2 &&
-    mouseY >= canvasTop2 &&
-    mouseY <= canvasTop2 + stampCanvasHeight2
-  ) {
-    console.log("we made it into canvas 2");
-    if (currentStroke === null) {
-      currentStroke = {
-        size: sizeSlider.value,
-        color: colorPicker.value,
-        shape: penTip, // Store the shape of the brush
-        points: [],
-      };
-      strokes.push(currentStroke);
     }
-    let stroke = currentStroke;
-    if (penTip === 'Eraser') {
-      popUpCanvas2.erase(255, 255);
-      popUpCanvas2.circle(x, y, 10);
-      popUpCanvas2.noErase();
-      popUpCanvas2.clear();
-      clear();
-      dirty = true;
+   
+    else if (isInsideCanvas2(x, y)) {
+      console.log("we made it into canvas 2");
+      if (currentStroke === null) {
+        currentStroke = {
+          size: sizeSlider.value,
+          color: colorPicker.value,
+          shape: penTip, // Store the shape of the brush
+          points: [],
+        };
+        strokes.push(currentStroke);
+      }
+      let stroke = currentStroke;
+      if (penTip === 'Eraser') {
+        popUpCanvas2.erase(255, 255);
+        popUpCanvas2.circle(x, y, 10);
+        popUpCanvas2.noErase();
+        popUpCanvas2.clear();
+        clear();
+        dirty = true;
+        return;
+      }
+      //popUpCanvas2.noStroke();
+      //popUpCanvas2.fill(stroke.color);
+      //popUpCanvas2.circle(mouseX - canvasLeft2, mouseY - canvasTop2, stroke.size);
+      clickOnCanvas2(stroke);
       return;
     }
-    //popUpCanvas2.noStroke();
-    //popUpCanvas2.fill(stroke.color);
-    //popUpCanvas2.circle(mouseX - canvasLeft2, mouseY - canvasTop2, stroke.size);
-    clickOnCanvas2(stroke);
-    return;
-  }
-  else if (
-    mouseX >= canvasLeft3 &&
-    mouseX <= canvasLeft3 + stampCanvasWidth3 &&
-    mouseY >= canvasTop3 &&
-    mouseY <= canvasTop3 + stampCanvasHeight3
-  ) {
+   else if (isInsideCanvas3(x, y)) {
     console.log("we made it into canvas 3");
     if (currentStroke === null) {
       currentStroke = {
@@ -456,17 +472,21 @@ function mouseDragged() {
       currentStroke = {
         size: sizeSlider.value,
         color: colorPicker.value,
-        shape: penTip, // Store the shape of the brush
+        shape: penTip,
         points: [],
       };
       strokes.push(currentStroke);
     }
 
-    console.log("1");
-    currentStroke.points.push({ x: x, y: y });
-    drawLine(currentStroke.points.length - 2, currentStroke.points.length - 1);
+    if (!prevX || dist(x, y, prevX, prevY) > 0) {
+      currentStroke.points.push({ x: x, y: y });
+      drawLine(currentStroke.points.length - 2, currentStroke.points.length - 1);
+      prevX = x;
+      prevY = y;
+    }
   }
 }
+
 function mouseClicked() {
   let x = mouseX;
   let y = mouseY - fontsize;
@@ -496,17 +516,17 @@ function mouseClicked() {
 
       if (selectedStamp === 'stamp1') {
         stamp = popUpCanvas1.get();
-        gfx.image(stamp, mouseX - stamp.width / 2, mouseY - stamp.height / 2);
+        gfx.image(stamp, mouseX - stamp.width / 4, mouseY - stamp.height / 4,50,50); //(IMG,x,y,width,height)
         dirty = true;
         //console.log("try harder");
       } else if (selectedStamp === 'stamp2') {
         stamp = popUpCanvas2.get();
-        gfx.image(stamp, mouseX - stamp.width / 2, mouseY - stamp.height / 2);
+        gfx.image(stamp, mouseX - stamp.width / 4, mouseY - stamp.height / 4,50,50);
         dirty = true;
         //console.log("try harder2");
       } else if (selectedStamp === 'stamp3') {
         stamp = popUpCanvas3.get();
-        gfx.image(stamp, mouseX - stamp.width / 2, mouseY - stamp.height / 2);
+        gfx.image(stamp, mouseX - stamp.width / 4, mouseY - stamp.height / 4,50,50);
         dirty = true;
         //console.log("try harder3");
       }
@@ -765,23 +785,6 @@ function mouseReleased() {
 }
 
 
-function undo() {
-  if (strokes.length > 0) {
-    let lastStroke = strokes.pop();
-    savedStrokes.push(lastStroke); // Move the stroke to savedStrokes array
-    redrawCanvas();
-  }
-}
-
-
-function redo() {
-  if (savedStrokes.length > 0) {
-    let lastSavedStroke = savedStrokes.pop();
-    strokes.push(lastSavedStroke); // Move the stroke back to strokes array
-    redrawCanvas();
-  }
-}
-
 function redrawCanvas() {
   gfx.clear();
   gfx.background(0, 0, 0, 0);
@@ -812,7 +815,7 @@ function redrawCanvas() {
 }
 function changeStamp(temp) {
   selectedStamp = temp;
-  console.log(selectedStamp);
+  //console.log(selectedStamp);
 }
 
 
