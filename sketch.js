@@ -265,19 +265,67 @@ function draw() {
 }
 
 function saveImg() {
-  const canvasSave = document.getElementById('canvas')
-  canvasSave.toBlob(function (blob) {
+  const canvas = document.getElementById('canvas')
+  // Get references to the canvas element and "Save" button
+const saveButton = document.getElementById("btnSave");
 
-    const anchor = document.getElementById('a');
-    anchor.href = URL.createObjectURL(blob);
+// Get the 2D context of the canvas
+const ctx = canvas.getContext("2d");
 
-    anchor.download = 'canvas_image.png';
-    anchor.click();
+// Your existing code for drawing on the canvas goes here
+// ...
 
-    URL.revokeObjectURL(anchor.href);
+// Function to handle "Save" button click
+saveButton.addEventListener("click", () => {
+  // Get the data URL of the canvas content (PNG format by default)
+  const dataURL = canvas.toDataURL();
+
+  // Create a new Image object
+  const image = new Image();
+
+  // Set the source of the Image to the data URL
+  image.src = dataURL;
+
+  // Create a new anchor element
+  const anchor = document.createElement("a");
+
+  // Set the href attribute to the data URL
+  anchor.href = dataURL;
+
+  // Set the download attribute to suggest a filename for the download
+  anchor.download = "drawing.png";
+
+  // Add an event listener to load the image and trigger the download
+  anchor.addEventListener("click", () => {
+    // Draw the image on a new canvas to ensure correct aspect ratio and resolution
+    const newCanvas = document.createElement("canvas");
+    const newCtx = newCanvas.getContext("2d");
+    newCanvas.width = image.width;
+    newCanvas.height = image.height;
+    newCtx.drawImage(image, 0, 0, image.width, image.height);
+
+    // Convert the canvas to a Blob (binary data)
+    newCanvas.toBlob((blob) => {
+      // Create a new FormData object to hold the Blob data
+      const formData = new FormData();
+      formData.append("image", blob, "drawing.png");
+
+      // Use the Web Share API to allow the user to save the image to the Photos app
+      if (navigator.share && navigator.canShare({ files: [blob] })) {
+        navigator.share({
+          files: [formData],
+        });
+      } else {
+        // Fallback for browsers that do not support Web Share API
+        alert("Sorry, your device does not support saving to Photos.");
+      }
+    });
   });
-  //.save('image.png');
-  // popUpCanvas1.save('canvas1image')
+
+  // Programmatically click the anchor element to initiate the download
+  anchor.click();
+});
+
 }
 
 function clearImg() {
