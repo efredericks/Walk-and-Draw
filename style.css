@@ -89,11 +89,20 @@ body {
 }
 
 /* CODE BELOW IS ALL TO DO WITH THE PENTIP SELECTION MENU*/
-/*@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
-*/
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
 .custom-icon {
     width: 30px; 
     height: 30px; 
+    /*image-resolution: auto;
+    image-rendering: crisp-edges;
+    filter: drop-shadow(0 0 2px black);*/
+    
+}
+.custom-icon-erase {
+    width: 35px; 
+    height: 35px; 
+    position: relative;
     /*image-resolution: auto;
     image-rendering: crisp-edges;
     filter: drop-shadow(0 0 2px black);*/
@@ -221,7 +230,7 @@ body {
 }
 
 .pen-tip ul li:nth-child(5).active~.indicator {
-    transform: translateX(calc(58px * 4));
+    transform: translateX(calc(58.4px * 4));
 }
 
 .pen-tip ul li:nth-child(6).active~.indicator {
