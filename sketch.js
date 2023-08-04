@@ -1,5 +1,9 @@
-// font: https://fonts.google.com/specimen/Nerko+One
-// https://support.google.com/chrome/thread/20108907/how-to-stop-desktop-browser-chrome-from-interpreting-my-wacom-tablet-as-a-touchscreen?hl=en
+/*
+AUTHOR: Andrew Goodling 
+TIMELINE: May 2023 - August 2023
+SUPERVISOR: ERIK FREDERICKS
+PROJECT: WALK AND DRAW GVSU
+**/
 
 let strokes = [];
 let savedStrokes = [];
@@ -40,7 +44,11 @@ let currentPosition;
 var img;
 let prevX, prevY;
 
-
+/*
+setUpMap()
+This function loads in the map and its functionalities.
+Called from setUp();
+**/
 function setUpMap(latitude, longitude) {
   mapboxgl.accessToken = mapboxAccessToken;
   console.log("lat: ",latitude, "long: ", longitude);
@@ -50,7 +58,6 @@ function setUpMap(latitude, longitude) {
     center: [longitude, latitude],
     zoom: zoomLevel
   });
-  //this all goes together
   map1.on('load', () => {
     map1.addSource('current-location', {
       type: 'geojson',
@@ -75,10 +82,14 @@ function setUpMap(latitude, longitude) {
       }
     });
   });
-  //to here
   loopLocation();
 }
-
+/*
+loopLocation();
+This function watches the users location for movement. 
+Called from setUpMap(); 
+Calls updateDotPosition();
+**/
 function loopLocation(){
   if (navigator.geolocation) {
     navigator.geolocation.watchPosition(position => {
@@ -88,8 +99,14 @@ function loopLocation(){
     });
   }
 }
-//longitude and latitude are measurements for the map to be centered.
-//currentLongitude and currentLatitude are the ones for the dot specifically
+
+/*
+updateDotPostion();
+longitude/latitude = map center.
+currentLongitude/currentLatitude = dot location.
+This function updates the users dot location on the map. 
+Called from loopLocation();
+**/
 
 function updateDotPosition() {
   map1.getSource('current-location').setData({
@@ -99,12 +116,14 @@ function updateDotPosition() {
       coordinates: [currentLongitude, currentLatitude]
     }
   })
-  console.log("lat: ",currentLatitude, "long: ", currentLongitude);
-
 }
 loopLocation();
  
-
+/*
+trackUserLocation();
+This promise holds until the user accepts the tracking services and the device finds the location.
+Called from setUp();
+**/
 function trackUserLocation() {
   return new Promise((resolve, reject) => {
     if (navigator.geolocation) {
@@ -123,7 +142,12 @@ function trackUserLocation() {
     }
   });
 }
-
+/*
+setUp();
+This function is called at every opening of the application. 
+Called from device open;
+Calls trackUserLocation and sets up the canvases/ stamp canvases / functionality.
+**/
 function setup() {
   windowScale = DIM / 1000;
   fontsize = 24 * windowScale;
@@ -142,26 +166,16 @@ function setup() {
   gfx.textAlign(LEFT, CENTER);
   textAlign(LEFT, CENTER);
 
-  //creation of the stampping canvas
   let CreateCanvases = createStampCanvases();
   frameRate(60);
 
-  //let titleWidth = drawHeader();
-
-  //buttons for all \/\/
   btnSave = document.getElementById('btnSave');
   btnClear = document.getElementById('btnClear');
-  // btnUndo = document.getElementById('btnUndo');
-  // btnRedo = document.getElementById('btnRedo');
   colorPicker = document.getElementById('colorPicker');
   sizeSlider = document.getElementById('sizeSlider');
   colorPicker.addEventListener('input', changeStroke);
   sizeSlider.addEventListener('input', changeStroke);
-  // btnUndo.addEventListener('click', undo);
-  //btnRedo.addEventListener('click', redo);
   let stampDropDown = document.getElementById('stamp-dropdown');
-
-
   gfx.noStroke();
 
 //promise for users location
@@ -174,13 +188,19 @@ function setup() {
       console.error("Error getting the users location", error);
     });
 }
+
+/*
+createStampCanvases();
+This function creates and sets up all bounding for the three stamp canvases.
+Called from setUp()
+**/
 function createStampCanvases() {
-  //stampcanvas top
+  // SETUP STAMP 1
   popUpCanvasElement1 = document.getElementById("stampcanvas1");
 
   computedStyle1 = window.getComputedStyle(popUpCanvasElement1);
 
-  // Get the width and height values from the computed style
+  // Get the width and height values from the computed style for STAMP1
   stampCanvasWidth1 = parseInt(computedStyle1.getPropertyValue("width"), 10);
   stampCanvasHeight1 = parseInt(computedStyle1.getPropertyValue("height"), 10);
   canvasRect1 = popUpCanvasElement1.getBoundingClientRect();
@@ -189,21 +209,16 @@ function createStampCanvases() {
   canvasLeft1 = canvasRect1.left + window.scrollX;
   canvasTop1 = canvasRect1.top + window.scrollY;
 
-  console.log(canvasLeft1); // Output: X-coordinate position
-  console.log(canvasTop1); // Output: Y-coordinate position
-
-  console.log(stampCanvasWidth1);
-  console.log(stampCanvasHeight1);
   popUpCanvas1 = createGraphics(stampCanvasWidth1, stampCanvasHeight1);
   popUpCanvas1.position(canvasLeft1, canvasTop1);
   popUpCanvas1.style("z-index", "2");
 
-  // stampCanvas middle
+  // SETUP STAMP 2
   popUpCanvasElement2 = document.getElementById("stampcanvas2");
 
   computedStyle2 = window.getComputedStyle(popUpCanvasElement2);
 
-  // Get the width and height values from the computed style
+  // Get the width and height values from the computed style for STAMP2
   stampCanvasWidth2 = parseInt(computedStyle2.getPropertyValue("width"), 10);
   stampCanvasHeight2 = parseInt(computedStyle2.getPropertyValue("height"), 10);
   canvasRect2 = popUpCanvasElement2.getBoundingClientRect();
@@ -212,21 +227,16 @@ function createStampCanvases() {
   canvasLeft2 = canvasRect2.left + window.scrollX;
   canvasTop2 = canvasRect2.top + window.scrollY;
 
-  console.log(canvasLeft2); // Output: X-coordinate position
-  console.log(canvasTop2); // Output: Y-coordinate position
-
-  console.log(stampCanvasWidth2);
-  console.log(stampCanvasHeight2);
   popUpCanvas2 = createGraphics(stampCanvasWidth2, stampCanvasHeight2);
   popUpCanvas2.position(canvasLeft2, canvasTop2);
   popUpCanvas2.style("z-index", "2");
 
-  // stampCanvas Bottom
+  // SETUP STAMP 3
   popUpCanvasElement3 = document.getElementById("stampcanvas3");
 
   computedStyle3 = window.getComputedStyle(popUpCanvasElement3);
 
-  // Get the width and height values from the computed style
+  // Get the width and height values from the computed style for STAMP3
   stampCanvasWidth3 = parseInt(computedStyle3.getPropertyValue("width"), 10);
   stampCanvasHeight3 = parseInt(computedStyle3.getPropertyValue("height"), 10);
   canvasRect3 = popUpCanvasElement3.getBoundingClientRect();
@@ -235,22 +245,19 @@ function createStampCanvases() {
   canvasLeft3 = canvasRect3.left + window.scrollX;
   canvasTop3 = canvasRect3.top + window.scrollY;
 
-  console.log(canvasLeft3); // Output: X-coordinate position
-  console.log(canvasTop3); // Output: Y-coordinate position
-
-  console.log(stampCanvasWidth3);
-  console.log(stampCanvasHeight3);
   popUpCanvas3 = createGraphics(stampCanvasWidth3, stampCanvasHeight3);
   popUpCanvas3.position(canvasLeft3, canvasTop3);
   popUpCanvas3.style("z-index", "2");
 
 }
+/*
+draw();
+This function is continuously called by the software and draws the drawing to the main canvas.
 
+**/
 function draw() {
   if (dirty) {
-    //background();
     image(gfx, 0, 24);
-    //drawHeader();
     dirty = false;
   }
   image(popUpCanvas1, canvasLeft1, canvasTop1);
@@ -264,7 +271,10 @@ function draw() {
   }//delay in between drawing shapes
   if (debounce > 0) debounce--;
 }
-
+/*
+saveImg();
+WORKING active
+**/
 function saveImg() {
   const canvas = document.getElementById('canvas')
   // Get references to the canvas element and "Save" button
@@ -328,7 +338,11 @@ saveButton.addEventListener("click", () => {
 });
 
 }
-
+/*
+clearImg();
+This clears the canvas.
+Called from clear Button action listener.
+**/
 function clearImg() {
   dirty = true;
   console.log("Clear");
@@ -337,7 +351,10 @@ function clearImg() {
   savedStrokes = [];
   clear();
 }
-
+/*
+changeStroke();
+This changes the current stroke to a new updated stroke type.
+**/
 function changeStroke() {
   if (currentStroke !== null) {
     currentStroke.size = sizeSlider.value;
@@ -345,7 +362,12 @@ function changeStroke() {
     dirty = true;
   }
 }
-
+/*
+isInsideCanvas1();
+Returns a boolean if the mouse is on canvas 1.
+x and y are mouse coordinates.
+Called from MouseDragged
+**/
 function isInsideCanvas1(x, y) {
   return (
     x >= canvasLeft1 &&
@@ -355,7 +377,11 @@ function isInsideCanvas1(x, y) {
   );
 }
 
-// Function to check if the mouse is inside canvas 2
+/*
+isInsideCanvas2();
+Returns a boolean if the mouse is on canvas 2.
+x and y are mouse coordinates.
+**/
 function isInsideCanvas2(x, y) {
   return (
     x >= canvasLeft2 &&
@@ -365,7 +391,12 @@ function isInsideCanvas2(x, y) {
   );
 }
 
-// Function to check if the mouse is inside canvas 3
+/*
+isInsideCanvas3();
+Returns a boolean if the mouse is on canvas 3.
+x and y are mouse coordinates.
+
+**/
 function isInsideCanvas3(x, y) {
   return (
     x >= canvasLeft3 &&
@@ -375,8 +406,11 @@ function isInsideCanvas3(x, y) {
   );
 }
 
-
-
+/*
+mouseDragged();
+This function is called when a mouse is dragged on the screen. Goes between main canvas and stamping canvase.
+Calls all checks to stamps, along with drawin on different graphics objects.
+**/
 function mouseDragged() {
   let x = mouseX;
   let y = mouseY - fontsize;
@@ -387,7 +421,7 @@ function mouseDragged() {
 
   // Check if the mouse is inside the canvas area for drawing
   if (isInsideCanvas1(x, y)) {
-    console.log("we made it into canvas 1");
+    //console.log("we made it into canvas 1");
     if (currentStroke === null) {
       currentStroke = {
         size: sizeSlider.value,
@@ -413,7 +447,7 @@ function mouseDragged() {
     }
    
     else if (isInsideCanvas2(x, y)) {
-      console.log("we made it into canvas 2");
+      //console.log("we made it into canvas 2");
       if (currentStroke === null) {
         currentStroke = {
           size: sizeSlider.value,
@@ -433,14 +467,11 @@ function mouseDragged() {
         dirty = true;
         return;
       }
-      //popUpCanvas2.noStroke();
-      //popUpCanvas2.fill(stroke.color);
-      //popUpCanvas2.circle(mouseX - canvasLeft2, mouseY - canvasTop2, stroke.size);
       clickOnCanvas2(stroke);
       return;
     }
    else if (isInsideCanvas3(x, y)) {
-    console.log("we made it into canvas 3");
+    //console.log("we made it into canvas 3");
     if (currentStroke === null) {
       currentStroke = {
         size: sizeSlider.value,
@@ -460,9 +491,6 @@ function mouseDragged() {
       dirty = true;
       return;
     }
-    //popUpCanvas3.noStroke();
-    //popUpCanvas3.fill(stroke.color);
-    // popUpCanvas3.circle(mouseX - canvasLeft3, mouseY - canvasTop3, stroke.size);
     clickOnCanvas3(stroke);
     return;
   }
@@ -486,12 +514,14 @@ function mouseDragged() {
     }
   }
 }
-
+/*
+mouseClicked();
+This function is called when a mouse is clicked. Differentiates between stamp and main canvas.
+Calls from a mouse click on screen.
+**/
 function mouseClicked() {
   let x = mouseX;
   let y = mouseY - fontsize;
-  console.log("x" + mouseX);
-  console.log("y" + mouseY);
 
   if (y > fontsize) {
     if (currentStroke === null) {
@@ -509,26 +539,20 @@ function mouseClicked() {
   }
   let stroke = currentStroke;
   if (check()) {
-    console.log("canvas selection: " + canvasClickSelectionLabel);
     if (penTip === 'Stamp') {
-      console.log(selectedStamp);
-      //console.log(canvasClickSelectionLabel + "HELLO");
 
       if (selectedStamp === 'stamp1') {
         stamp = popUpCanvas1.get();
         gfx.image(stamp, mouseX - stamp.width / 4, mouseY - stamp.height / 4,50,50); //(IMG,x,y,width,height)
         dirty = true;
-        //console.log("try harder");
       } else if (selectedStamp === 'stamp2') {
         stamp = popUpCanvas2.get();
         gfx.image(stamp, mouseX - stamp.width / 4, mouseY - stamp.height / 4,50,50);
         dirty = true;
-        //console.log("try harder2");
       } else if (selectedStamp === 'stamp3') {
         stamp = popUpCanvas3.get();
         gfx.image(stamp, mouseX - stamp.width / 4, mouseY - stamp.height / 4,50,50);
         dirty = true;
-        //console.log("try harder3");
       }
 
     } else if (penTip === 'Circle') {
@@ -545,15 +569,12 @@ function mouseClicked() {
       let y2 = y + moving;
       let x3 = x - moving;
       let y3 = y + moving;
-      //console.log(stroke.size + " SIZE");
-      //console.log( "x1:"+ x1 + " y1:" +y1 + "    x2:"+ x2 + " y2:" +y2 + "    x3:"+ x3 + " y3:" +y3 );
-
+     
       gfx.triangle(x1, y1, x2, y2, x3, y3);
     } else if (penTip === 'WaterColor') {
       console.log("NO");
     }
   }
-  console.log(canvasClickSelectionLabel + " before");
   switch (canvasClickSelectionLabel) {
     case 1: clickOnCanvas1(currentStroke);
       canvasClickSelectionLabel = 0;
@@ -567,12 +588,14 @@ function mouseClicked() {
     default:
       break;
   }
-  console.log("after: " + canvasClickSelectionLabel);
-  // Set the shape property of the current stroke
   stroke.shape = penTip;
 
   dirty = true;
 }
+/*
+check();
+Called from mouseClicked. Returns true along with a value of canvasClickSelection. If the mouse is clicked onto a canvas.
+**/
 function check() {
   if (
     mouseX >= canvasLeft1 &&
@@ -600,6 +623,11 @@ function check() {
   } else
     return 4;
 }
+/*
+clickOnCanvas1();
+This function is called from the switch statement at the bottom of mouseClicked(),
+The value determines which function of clickOnCanvas() is called;
+**/
 function clickOnCanvas1(stroke1) {
   let stroke = stroke1;
   popUpCanvas1.strokeWeight(stroke.size);
@@ -630,6 +658,11 @@ function clickOnCanvas1(stroke1) {
   dirty = true;
 
 }
+/*
+clickOnCanvas2();
+This function is called from the switch statement at the bottom of mouseClicked(),
+The value determines which function of clickOnCanvas() is called;
+**/
 function clickOnCanvas2(stroke2) {
   let stroke = stroke2;
   popUpCanvas2.strokeWeight(stroke.size);
@@ -660,6 +693,11 @@ function clickOnCanvas2(stroke2) {
   dirty = true;
 
 }
+/*
+clickOnCanvas3();
+This function is called from the switch statement at the bottom of mouseClicked(),
+The value determines which function of clickOnCanvas() is called;
+**/
 function clickOnCanvas3(stroke3) {
   let stroke = stroke3;
   popUpCanvas3.strokeWeight(stroke.size);
@@ -690,8 +728,11 @@ function clickOnCanvas3(stroke3) {
   dirty = true;
 
 }
-
-
+/*
+drawLine();
+This Function is called from mouseClicked() and mouseDragged().
+Determines the shape, size, and color and displays it to the gfx screen. 
+**/
 function drawLine(startIndex, endIndex) {
   let stroke = currentStroke;
   gfx.strokeWeight(stroke.size);
@@ -736,15 +777,20 @@ function drawLine(startIndex, endIndex) {
     dirty = true;
   }
 }
+/*
+blob();
+This function is called from drawLine().
+Responsible for the math behind the watercolor brush. 
+**/
 function blob(hue, size, x1, y1) {
   noStroke();
 
   // TODO: Potential fix on the GFX / TBD 
   for (var i = 0; i <= 2; i++) {
     var rs = random(2.0) - 1.0;
-    console.log("3");
+    //console.log("3");
 
-    beginShape();
+    gfx.beginShape();
     for (var a = 0; a <= 360; a += 10) {
       var r = (size * 4) + 25 * noise(a + 9 * rs) * 2 - 1;
       var x = r * cos(a);
@@ -754,12 +800,17 @@ function blob(hue, size, x1, y1) {
       let alphaValue = mapRange(a, 0, 360, 0, 5); // Adjust the range of alpha values as needed
       let shapeFillColor = color(hue);
       shapeFillColor.setAlpha(alphaValue);
-      fill(shapeFillColor);
+      gfx.fill(shapeFillColor);
       curveVertex(x1 + x, y1 - y);
     }
-    endShape();
+    gfx.endShape();
   }
 }
+/*
+eraseFun();
+This function is called from drawLine().
+Responsible for the eraser tool.
+**/
 function eraseFun(size, x, y) {
   gfx.erase(255, 255);
   console.log("ERASEFUN")
@@ -770,12 +821,20 @@ function eraseFun(size, x, y) {
 }
 
 
-// Custom mapping function
+/*
+mapRange();
+This function is called from blob();
+Calculates the alpha value for the waterColor opacity.
+**/
 function mapRange(value, inputMin, inputMax, outputMin, outputMax) {
   return ((value - inputMin) * (outputMax - outputMin)) / (inputMax - inputMin) + outputMin;
 }
 
-
+/*
+mouseReleased();
+This function is called when the mouse is released. 
+Resets the current stroke to NULL. 
+**/
 function mouseReleased() {
   if (currentStroke !== null) {
     strokes.push(currentStroke);
@@ -784,7 +843,10 @@ function mouseReleased() {
   }
 }
 
-
+/*
+redrawCanvas();
+POTENTIALLY NOT USED..?
+**/
 function redrawCanvas() {
   gfx.clear();
   gfx.background(0, 0, 0, 0);
@@ -813,9 +875,12 @@ function redrawCanvas() {
 
   dirty = true;
 }
+/*
+changeStamp();
+Just changes the stamp.
+**/
 function changeStamp(temp) {
   selectedStamp = temp;
-  //console.log(selectedStamp);
 }
 
 
@@ -862,7 +927,6 @@ stampDropDown.addEventListener("change", function () {
 });
 
 // Add event listeners to buttons and sliders to track touch interactions
-
 function checkInteractions(event) {
   // Check if the event target is a button or slider
   const target = event.target;

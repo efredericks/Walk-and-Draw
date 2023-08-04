@@ -100,8 +100,8 @@ body {
     
 }
 .custom-icon-erase {
-    width: 35px; 
-    height: 35px; 
+    width: 30px; 
+    height: 30px; 
     position: relative;
     /*image-resolution: auto;
     image-rendering: crisp-edges;
@@ -218,15 +218,15 @@ body {
 }
 
 .pen-tip ul li:nth-child(2).active~.indicator {
-    transform: translateX(calc(55px * 1));
+    transform: translateX(calc(54.5px * 1));
 }
 
 .pen-tip ul li:nth-child(3).active~.indicator {
-    transform: translateX(calc(57.5px * 2));
+    transform: translateX(calc(57px * 2));
 }
 
 .pen-tip ul li:nth-child(4).active~.indicator {
-    transform: translateX(calc(58.5px * 3));
+    transform: translateX(calc(58px * 3));
 }
 
 .pen-tip ul li:nth-child(5).active~.indicator {
