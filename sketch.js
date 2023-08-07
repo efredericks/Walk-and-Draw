@@ -153,7 +153,7 @@ function setup() {
   fontsize = 24 * windowScale;
   penTip = 'Circle';
 
-  var canvas = createCanvas(windowWidth, windowHeight);
+  var canvas = createCanvas(windowWidth, windowHeight-100);
   canvas.id('canvas');
   canvas.style('z-index', '1');
   gfx = createGraphics(width, height);
@@ -168,6 +168,7 @@ function setup() {
 
   let CreateCanvases = createStampCanvases();
   frameRate(60);
+  alert("Welcome to GVSU Walk and Draw! Complete your drawings on screen BEFORE you use the watercolor brush to shade! Enjoy!");
 
   btnSave = document.getElementById('btnSave');
   btnClear = document.getElementById('btnClear');
@@ -632,7 +633,7 @@ function clickOnCanvas1(stroke1) {
   let stroke = stroke1;
   popUpCanvas1.strokeWeight(stroke.size);
   popUpCanvas1.stroke(stroke.color);
-  console.log("canvas 1 click working");
+  //console.log("canvas 1 click working");
 
 
   if (penTip === 'Circle') {
@@ -649,9 +650,6 @@ function clickOnCanvas1(stroke1) {
     let y2 = mouseY + moving;
     let x3 = mouseX - moving;
     let y3 = mouseY + moving;
-    //console.log(stroke.size + " SIZE");
-    //console.log( "x1:"+ x1 + " y1:" +y1 + "    x2:"+ x2 + " y2:" +y2 + "    x3:"+ x3 + " y3:" +y3 );
-
     popUpCanvas1.triangle(x1 - canvasLeft1, y1 - canvasTop1, x2 - canvasLeft1, y2 - canvasTop1, x3 - canvasLeft1, y3 - canvasTop1);
   }
   stroke.shape = penTip;
@@ -765,8 +763,7 @@ function drawLine(startIndex, endIndex) {
 
       gfx.triangle(x1, y1, x2, y2, x3, y3);
     } else if (penTip === 'Water') {
-      console.log("2");
-      blob(stroke.color, stroke.size, endPoint.x, endPoint.y);
+      blob(stroke.color,3, stroke.size, endPoint.x, endPoint.y);
     }
     else if (penTip === 'Eraser') {
       eraseFun(stroke.size, endPoint.x, endPoint.y);
@@ -782,7 +779,7 @@ blob();
 This function is called from drawLine().
 Responsible for the math behind the watercolor brush. 
 **/
-function blob(hue, size, x1, y1) {
+function blob(hue, alpha, size, x1, y1) {
   noStroke();
 
   // TODO: Potential fix on the GFX / TBD 
@@ -790,22 +787,23 @@ function blob(hue, size, x1, y1) {
     var rs = random(2.0) - 1.0;
     //console.log("3");
 
-    gfx.beginShape();
+    beginShape();
     for (var a = 0; a <= 360; a += 10) {
       var r = (size * 4) + 25 * noise(a + 9 * rs) * 2 - 1;
       var x = r * cos(a);
       var y = r * sin(a);
 
       // Calculate alpha value based on the range of a
-      let alphaValue = mapRange(a, 0, 360, 0, 5); // Adjust the range of alpha values as needed
+      let alphaValue = mapRange(a, 0, 360, 0, alpha); // Use the alpha parameter here
       let shapeFillColor = color(hue);
       shapeFillColor.setAlpha(alphaValue);
-      gfx.fill(shapeFillColor);
+      fill(shapeFillColor);
       curveVertex(x1 + x, y1 - y);
     }
-    gfx.endShape();
+    endShape(CLOSE);
   }
 }
+
 /*
 eraseFun();
 This function is called from drawLine().
@@ -813,7 +811,6 @@ Responsible for the eraser tool.
 **/
 function eraseFun(size, x, y) {
   gfx.erase(255, 255);
-  console.log("ERASEFUN")
   gfx.fill('red');
   gfx.circle(x, y, size);
   gfx.noErase();
@@ -846,7 +843,7 @@ function mouseReleased() {
 /*
 redrawCanvas();
 POTENTIALLY NOT USED..?
-**/
+
 function redrawCanvas() {
   gfx.clear();
   gfx.background(0, 0, 0, 0);
@@ -875,6 +872,7 @@ function redrawCanvas() {
 
   dirty = true;
 }
+**/
 /*
 changeStamp();
 Just changes the stamp.
