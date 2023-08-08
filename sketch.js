@@ -170,7 +170,7 @@ function setup() {
   frameRate(60);
   alert("Welcome to GVSU Walk and Draw! Complete your drawings on screen BEFORE you use the watercolor brush to shade! Enjoy!");
 
-  btnSave = document.getElementById('btnSave');
+  //btnSave = document.getElementById('btnSave');
   btnClear = document.getElementById('btnClear');
   colorPicker = document.getElementById('colorPicker');
   sizeSlider = document.getElementById('sizeSlider');
