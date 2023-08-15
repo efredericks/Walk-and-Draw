@@ -73,8 +73,8 @@ body {
     grid-template-rows: repeat(2, min-content);
     gap: 10px;
     position: absolute;
-    top: 83%;
-    right: 80%;
+    top: 80%;
+    right: 78%;
 }
 
 .grid-item {
@@ -83,6 +83,10 @@ body {
     align-items: center;
     justify-content: center;
     color: white;
+}
+input[type="color"] {
+    width: 100px;
+    height: 60px;
 }
 .grid-item label{
     margin-bottom: 10px;

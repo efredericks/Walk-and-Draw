@@ -179,6 +179,8 @@ function setup() {
   let stampDropDown = document.getElementById('stamp-dropdown');
   gfx.noStroke();
 
+  //createMapDrag(windowWidth,windowHeight);
+
 //promise for users location
   trackUserLocation()
     .then((locationData) => {
@@ -188,6 +190,14 @@ function setup() {
     }).catch((error) => {
       console.error("Error getting the users location", error);
     });
+}
+
+function createMapDrag(width,height){
+  let topPointWidth = width - 200;
+  let topPointHeight = height - 200;
+  gfx.background(255,255,255);
+  gfx.square(0,0,-10);
+  
 }
 
 /*
