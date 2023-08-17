@@ -79,13 +79,16 @@
             right: 30px;
         }
 
-        #header {
+        .header-image {
             z-index: 3;
             position: absolute;
-            height: 8%;
-            width: 40%;
-            
-
+            height: auto;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .header-image img{
+            max-width: 100%;
+            height: auto;
         }
         
         .white-square {
@@ -129,9 +132,9 @@
     <canvas id="stampcanvas2"></canvas>
     <canvas id="stampcanvas3"></canvas>
 
-
-    <img id="header" src="workingtitle3.png" alt="header" />
-
+    <div class = "header-image">
+        <img src="workingtitle3.png" alt="header-image" />
+    </div>  
 
 
     <!-- Buttons -->
