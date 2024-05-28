@@ -33,7 +33,7 @@ const DIM = 1000;
 //map things
 let penTip;
 let map1;
-const mapboxAccessToken = 'pk.eyJ1IjoiZ29vZGxpbmEiLCJhIjoiY2xpM2F2ZGlpMGxseDNnbnRqMWl1c3A3bCJ9.WMJlwaLWmoNc-YuSv-92Ow';
+const mapboxAccessToken = 'pk.eyJ1IjoiZWZyZWRlcmlja3MiLCJhIjoiY2x3cW0wMnR0MDNtdTJscHhhaW05dXVrNiJ9.y6XqXeOIq5GwhzQyAgRqHA';
 let hollandLatitude = 42.78;
 let hollandLongitude = -86.1089;
 const zoomLevel = 17;
